@@ -22,13 +22,13 @@ public class Graph {
             throw new IllegalArgumentException("Both locations must exist in the graph.");
         }
         adjacencyList.get(from).add(new Edge(to, distance));
-        adjacencyList.get(to).add(new Edge(from, distance)); // For undirected graph
+        adjacencyList.get(to).add(new Edge(from, distance));
     }
 
     public void displayGraph() {
         for (String name : adjacencyList.keySet()) {
             Location loc = locationInfoMap.get(name);
-            String details = (loc != null) ? " (" + loc.getFacultyorDorm() + " - " + loc.getBlock() + ")" : "";
+            String details = (loc != null) ? " (" + loc.getFacultyOrDorm() + " - " + loc.getBlock() + ")" : "";
             System.out.print(name + details + " -> ");
         
             List<Edge> edges = adjacencyList.get(name);
