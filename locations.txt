@@ -1,0 +1,12 @@
+Cafeteria A
+Cafeteria B
+Hostel A
+Hostel B
+Hostel C
+Faculty of Science
+Faculty of Engineering
+Faculty of Arts
+Library
+Sports Complex
+Main Gate
+Student Center

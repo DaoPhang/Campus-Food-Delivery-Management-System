@@ -1,0 +1,5 @@
+O001,Aisyah,Cafeteria A,Hostel B,1,Pending
+O002,Kumar,Cafeteria B,Faculty of Engineering,2,Pending
+O003,Tan Wei,Cafeteria A,Library,1,Pending
+O004,Fatimah,Cafeteria B,Hostel C,3,Pending
+O005,Lee Ming,Cafeteria A,Faculty of Arts,2,Pending

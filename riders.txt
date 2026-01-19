@@ -1,0 +1,5 @@
+R001,Ali,Hostel A
+R002,Ahmad,Cafeteria A
+R003,Siti,Faculty of Engineering
+R004,Mei Ling,Library
+R005,Raj,Student Center

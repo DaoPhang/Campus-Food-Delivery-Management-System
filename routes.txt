@@ -1,0 +1,20 @@
+Cafeteria A,Hostel A,3
+Cafeteria A,Hostel B,5
+Cafeteria A,Faculty of Science,4
+Cafeteria B,Hostel C,2
+Cafeteria B,Faculty of Engineering,3
+Cafeteria B,Library,4
+Hostel A,Hostel B,2
+Hostel B,Hostel C,3
+Hostel A,Faculty of Science,5
+Hostel B,Faculty of Arts,4
+Hostel C,Faculty of Engineering,3
+Faculty of Science,Library,2
+Faculty of Engineering,Library,3
+Faculty of Arts,Library,2
+Library,Student Center,2
+Student Center,Main Gate,4
+Main Gate,Cafeteria A,6
+Main Gate,Sports Complex,3
+Sports Complex,Hostel C,4
+Student Center,Cafeteria B,3
