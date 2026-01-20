@@ -75,10 +75,10 @@ public class Main {
 
         // Load data from files (UPGRADE 2)
         System.out.println("\n--- Loading Data from Files (UPGRADE 2) ---");
-        campusMap.loadLocations("locations.txt");
-        campusMap.loadRoutes("routes.txt");
-        dispatchSystem.loadRiders("riders.txt");
-        orderSystem.loadOrders("orders.txt");
+        campusMap.loadLocations("data/locations.txt");
+        campusMap.loadRoutes("data/routes.txt");
+        dispatchSystem.loadRiders("data/riders.txt");
+        orderSystem.loadOrders("data/orders.txt");
 
         System.out.println("\nSystem initialized successfully!\n");
     }
@@ -404,10 +404,10 @@ public class Main {
                     loadAllData();
                     break;
                 case 3:
-                    dispatchSystem.saveRiders("riders_backup.txt");
+                    dispatchSystem.saveRiders("data/riders_backup.txt");
                     break;
                 case 4:
-                    orderSystem.saveOrders("orders_backup.txt");
+                    orderSystem.saveOrders("data/orders_backup.txt");
                     break;
                 case 0:
                     back = true;
@@ -420,17 +420,17 @@ public class Main {
 
     private static void saveAllData() {
         System.out.println("\n[UPGRADE 2] Saving all data...");
-        dispatchSystem.saveRiders("riders_backup.txt");
-        orderSystem.saveOrders("orders_backup.txt");
+        dispatchSystem.saveRiders("data/riders_backup.txt");
+        orderSystem.saveOrders("data/orders_backup.txt");
         System.out.println("All data saved successfully!");
     }
 
     private static void loadAllData() {
         System.out.println("\n[UPGRADE 2] Reloading data from files...");
-        campusMap.loadLocations("locations.txt");
-        campusMap.loadRoutes("routes.txt");
-        dispatchSystem.loadRiders("riders.txt");
-        orderSystem.loadOrders("orders.txt");
+        campusMap.loadLocations("data/locations.txt");
+        campusMap.loadRoutes("data/routes.txt");
+        dispatchSystem.loadRiders("data/riders.txt");
+        orderSystem.loadOrders("data/orders.txt");
         System.out.println("Data reloaded successfully!");
     }
 
