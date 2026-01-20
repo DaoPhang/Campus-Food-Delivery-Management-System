@@ -101,8 +101,6 @@ public class OrderSystem {
 
                     Order o = new Order(id, name, pickup, delivery, priority, status);
 
-                    // --- YOUR FIX APPLIED HERE ---
-                    // 1. Always add to History and Map
                     allOrders.add(o);
                     orderMap.put(o.getOrderId(), o);
 
@@ -118,4 +116,5 @@ public class OrderSystem {
         }
     }
 }
+
 
