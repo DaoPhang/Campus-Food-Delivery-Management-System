@@ -1,5 +1,5 @@
-O001,Aisyah,KK10 Cafeteria,Kolej Kediaman 11,1,Pending
-O002,Kumar,KK12 Cafeteria,Faculty of Engineering UM,2,Pending
-O003,Tan Wei,KK10 Cafeteria,UM Main Library,1,Pending
-O004,Fatimah,KK12 Cafeteria,Kolej Kediaman 12,3,Pending
-O005,Lee Ming,KK10 Cafeteria,Faculty of Arts & Social Sciences,2,Pending
+O001,Aisyah,Main Library,KK12,1,Pending
+O002,Ben,FCSIT,KK9,2,Pending
+O003,Chong,Faculty of Science,UM Arena,1,Pending
+O004,David,Faculty of Engineering,Main Gate KL,3,Pending
+O005,Elina,DTC,FCSIT,2,Pending
