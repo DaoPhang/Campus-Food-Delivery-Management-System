@@ -2,7 +2,7 @@ import java.util.Scanner;
 
 /**
  * Main class with integrated menu system demonstrating all 5 upgrades:
- * 1. Smart Dispatch v2 (Weighted Optimization)
+ * 1. Smart Dispatch (Weighted Optimization)
  * 2. File Persistence (Save & Load)
  * 3. Undo/Redo System (Stack-based)
  * 4. Path Caching (HashMap Optimization)
@@ -18,8 +18,7 @@ public class Main {
         scanner = new Scanner(System.in);
 
         System.out.println("\n╔════════════════════════════════════════════════════════╗");
-        System.out.println("║    CAMPUS FOOD DELIVERY MANAGEMENT SYSTEM               ║");
-        System.out.println("║    WIA1002 Data Structures - Degree Level Project       ║");
+        System.out.println("║    CAMPUS FOOD DELIVERY MANAGEMENT SYSTEM              ║");
         System.out.println("╚════════════════════════════════════════════════════════╝\n");
 
         // Initialize systems
@@ -74,7 +73,6 @@ public class Main {
         orderSystem = new OrderSystem();
 
         // Load data from files (UPGRADE 2)
-        System.out.println("\n--- Loading Data from Files (UPGRADE 2) ---");
         campusMap.loadLocations("data/locations.txt");
         campusMap.loadRoutes("data/routes.txt");
         dispatchSystem.loadRiders("data/riders.txt");
@@ -85,15 +83,15 @@ public class Main {
 
     private static void displayMainMenu() {
         System.out.println("\n╔═══════════════════════════════╗");
-        System.out.println("║        MAIN MENU               ║");
+        System.out.println("║        MAIN MENU              ║");
         System.out.println("╠═══════════════════════════════╣");
-        System.out.println("║  1. Order Management           ║");
-        System.out.println("║  2. Rider Management           ║");
-        System.out.println("║  3. Dispatch Operations        ║");
-        System.out.println("║  4. Campus Map                 ║");
-        System.out.println("║  5. Save/Load Data             ║");
-        System.out.println("║  6. System Statistics          ║");
-        System.out.println("║  0. Exit                       ║");
+        System.out.println("║  1. Order Management          ║");
+        System.out.println("║  2. Rider Management          ║");
+        System.out.println("║  3. Dispatch Operations       ║");
+        System.out.println("║  4. Campus Map                ║");
+        System.out.println("║  5. Save/Load Data            ║");
+        System.out.println("║  6. System Statistics         ║");
+        System.out.println("║  0. Exit                      ║");
         System.out.println("╚═══════════════════════════════╝");
     }
 
@@ -232,8 +230,8 @@ public class Main {
         while (!back) {
             System.out.println("\n--- Dispatch Operations ---");
             System.out.println("╔═══════════════════════════════════════════╗");
-            System.out.println("║  UPGRADE 1: Weighted Optimization Active  ║");
-            System.out.println("║  UPGRADE 3: Undo/Redo System Available    ║");
+            System.out.println("║     Weighted Optimization Active          ║");
+            System.out.println("║     Undo/Redo System Available            ║");
             System.out.println("╚═══════════════════════════════════════════╝");
             System.out.println("1. Assign Next Order (Weighted Dispatch)");
             System.out.println("2. Complete Order");
@@ -294,7 +292,7 @@ public class Main {
         while (!back) {
             System.out.println("\n--- Campus Map ---");
             System.out.println("╔═══════════════════════════════════════════╗");
-            System.out.println("║  UPGRADE 4: Path Caching Active           ║");
+            System.out.println("║             Path Caching Active           ║");
             System.out.println("╚═══════════════════════════════════════════╝");
             System.out.println("1. Display Full Map");
             System.out.println("2. Find Shortest Path");
@@ -378,15 +376,12 @@ public class Main {
         System.out.println("  Dijkstra Calls: " + graph.getDijkstraCallCount());
     }
 
-    // ==========================================
-    // PERSISTENCE MENU (UPGRADE 2)
-    // ==========================================
     private static void persistenceMenu() {
         boolean back = false;
         while (!back) {
             System.out.println("\n--- File Persistence ---");
             System.out.println("╔═══════════════════════════════════════════╗");
-            System.out.println("║  UPGRADE 2: File Save/Load System         ║");
+            System.out.println("║             File Save/Load System         ║");
             System.out.println("╚═══════════════════════════════════════════╝");
             System.out.println("1. Save All Data");
             System.out.println("2. Load All Data");
@@ -434,9 +429,6 @@ public class Main {
         System.out.println("Data reloaded successfully!");
     }
 
-    // ==========================================
-    // STATISTICS (UPGRADE 5)
-    // ==========================================
     private static void displayStatistics() {
         System.out.println("\n[UPGRADE 5] Displaying comprehensive system statistics...");
         SystemStatistics.getInstance().displayStatistics(
