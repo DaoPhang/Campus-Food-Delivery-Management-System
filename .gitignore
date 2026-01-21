@@ -1,0 +1,6 @@
+.tmp.driveupload/
+out/
+.idea/
+.vscode/
+*.iml
+*.class
