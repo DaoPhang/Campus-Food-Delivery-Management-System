@@ -121,7 +121,7 @@ public class DispatchSystem {
             if (rider.getStatus() != Rider.RiderStatus.AVAILABLE)
                 continue;
 
-            String riderLoc = rider.getCurrentLocation();
+            String riderLoc = rider.getLocation();
 
             // Calculate distance to pickup
             double distToPickup = map.getDistance(riderLoc, pickupLoc);
@@ -154,13 +154,7 @@ public class DispatchSystem {
             return;
         }
 
-        // 3. Validate paths exist
-        if (bestDistToPickup < 0 || bestDistToDelivery < 0) {
-            System.out.println("Error: Invalid path detected.");
-            return;
-        }
-
-        // 4. Calculate total distance
+        // 3. Calculate total distance (validation already done in loop - only valid paths reach here)
         double totalDistance = bestDistToPickup + bestDistToDelivery;
 
         // 5. Store state for undo (UPGRADE 3)
@@ -265,7 +259,10 @@ public class DispatchSystem {
         // 5. Update Order status
         order.setStatus("Delivered");
 
-        // 6. Display completion message
+        // 6. Update global statistics with ACTUAL distance
+        SystemStatistics.getInstance().recordOrderProcessed(distance);
+
+        // 7. Display completion message
         System.out.println("\n=== Order Completed ===");
         System.out.println("Order ID: " + orderID);
         System.out.println("Student: " + order.getStudentName());
@@ -273,50 +270,6 @@ public class DispatchSystem {
         System.out.println("Rider moved from: " + oldLocation + " → " + order.getDeliveryLocation());
         System.out.println("Rider status: Available");
         System.out.println("Rider's total jobs: " + assignedRider.getJobsCompleted());
-        System.out.println("=======================\n");
-    }
-
-    // Backward compatibility overload
-    public void completeOrder(String orderID, OrderSystem orderSystem) {
-        System.out.println("Warning: Using legacy completeOrder without CampusMap reference.");
-        // Find the order
-        Order order = orderSystem.searchOrder(orderID);
-        if (order == null) {
-            System.out.println("Error: Order " + orderID + " not found.");
-            return;
-        }
-
-        if (!order.getStatus().equals("Delivering")) {
-            System.out.println("Error: Order " + orderID + " is not in 'Delivering' status.");
-            return;
-        }
-
-        // Find assigned rider
-        Rider assignedRider = null;
-        for (Rider r : riderList) {
-            if (r.getStatus() == Rider.RiderStatus.DELIVERING &&
-                    r.getCurrentOrderId() != null &&
-                    r.getCurrentOrderId().equals(orderID)) {
-                assignedRider = r;
-                break;
-            }
-        }
-
-        if (assignedRider == null) {
-            System.out.println("Error: No rider found carrying order " + orderID);
-            return;
-        }
-
-        String oldLocation = assignedRider.getLocation();
-        assignedRider.setLocation(order.getDeliveryLocation());
-        assignedRider.setStatus(Rider.RiderStatus.AVAILABLE);
-        assignedRider.setCurrentOrderId(null);
-        assignedRider.completeJob(0); // No distance tracking available
-        order.setStatus("Delivered");
-
-        System.out.println("\n=== Order Completed ===");
-        System.out.println("Order ID: " + orderID);
-        System.out.println("Delivered by: " + assignedRider.getName());
         System.out.println("=======================\n");
     }
 

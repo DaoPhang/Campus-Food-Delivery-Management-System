@@ -73,12 +73,20 @@ public class Main {
         orderSystem = new OrderSystem();
 
         // Load data from files (UPGRADE 2)
+        loadSystemData();
+
+        System.out.println("\nSystem initialized successfully!\n");
+    }
+
+    /**
+     * Load all system data from files
+     * Used by both initializeSystems() and loadAllData()
+     */
+    private static void loadSystemData() {
         campusMap.loadLocations("data/locations.txt");
         campusMap.loadRoutes("data/routes.txt");
         dispatchSystem.loadRiders("data/riders.txt");
         orderSystem.loadOrders("data/orders.txt");
-
-        System.out.println("\nSystem initialized successfully!\n");
     }
 
     private static void displayMainMenu() {
@@ -275,13 +283,7 @@ public class Main {
         System.out.print("Enter Order ID to complete: ");
         String orderId = scanner.nextLine().trim();
         dispatchSystem.completeOrder(orderId, orderSystem, campusMap);
-
-        // Update global statistics
-        Order order = orderSystem.searchOrder(orderId);
-        if (order != null && order.getStatus().equals("Delivered")) {
-            SystemStatistics.getInstance().recordOrderProcessed(
-                    dispatchSystem.getAverageDistancePerOrder());
-        }
+        // Statistics are now recorded inside DispatchSystem.completeOrder() with actual distance
     }
 
     // ==========================================
@@ -422,10 +424,7 @@ public class Main {
 
     private static void loadAllData() {
         System.out.println("\n[UPGRADE 2] Reloading data from files...");
-        campusMap.loadLocations("data/locations.txt");
-        campusMap.loadRoutes("data/routes.txt");
-        dispatchSystem.loadRiders("data/riders.txt");
-        orderSystem.loadOrders("data/orders.txt");
+        loadSystemData();
         System.out.println("Data reloaded successfully!");
     }
 

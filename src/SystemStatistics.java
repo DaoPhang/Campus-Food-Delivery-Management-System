@@ -126,17 +126,6 @@ public class SystemStatistics {
     }
 
     /**
-     * Display simple statistics (without dependencies)
-     */
-    public void displaySimpleStatistics() {
-        System.out.println("\n=== System Statistics ===");
-        System.out.println("Orders: " + totalOrdersProcessed);
-        System.out.printf("Avg Distance: %.1f km%n", getAverageDistance());
-        System.out.printf("Total Distance: %.1f km%n", totalDistanceTraveled);
-        System.out.println("=========================\n");
-    }
-
-    /**
      * Get statistics summary as string
      */
     public String getSummary() {

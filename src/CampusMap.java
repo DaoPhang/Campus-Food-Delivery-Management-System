@@ -23,10 +23,10 @@ public class CampusMap {
     }
 
     /**
-     * Add a location to the map
+     * Add a location to the map (delegates to 3-parameter version)
      */
     public void addLocation(String name) {
-        graph.addLocation(name, new Location("Campus", name));
+        addLocation(name, "Campus", name);
     }
 
     /**
@@ -53,11 +53,7 @@ public class CampusMap {
         if (from.equals(to))
             return 0;
 
-        List<String> path = graph.getShortestPath(from, to);
-        if (path.isEmpty())
-            return -1;
-
-        // Calculate total distance by summing edge weights
+        // getPathDistance handles caching and returns -1 if no path exists
         return graph.getPathDistance(from, to);
     }
 

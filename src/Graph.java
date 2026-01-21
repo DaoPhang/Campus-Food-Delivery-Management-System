@@ -77,7 +77,7 @@ public class Graph {
         }
 
         // UPGRADE 4: Check cache first
-        String cacheKey = start + "|" + end;
+        String cacheKey = getCacheKey(start, end);
         if (pathCache.containsKey(cacheKey)) {
             cacheHits++;
             return pathCache.get(cacheKey).getPath();
@@ -91,7 +91,7 @@ public class Graph {
         pathCache.put(cacheKey, result);
 
         // Also cache the reverse path (for undirected graph)
-        String reverseCacheKey = end + "|" + start;
+        String reverseCacheKey = getCacheKey(end, start);
         if (!pathCache.containsKey(reverseCacheKey)) {
             List<String> reversePath = new ArrayList<>(result.getPath());
             Collections.reverse(reversePath);
@@ -113,22 +113,13 @@ public class Graph {
             return 0;
         }
 
-        // Check cache first
-        String cacheKey = start + "|" + end;
-        if (pathCache.containsKey(cacheKey)) {
-            cacheHits++;
-            return pathCache.get(cacheKey).getDistance();
-        }
-
-        // Cache miss - run Dijkstra (this will populate cache)
+        // getShortestPath handles caching - just call it and retrieve from cache
         getShortestPath(start, end);
 
-        // Now get from cache
-        if (pathCache.containsKey(cacheKey)) {
-            return pathCache.get(cacheKey).getDistance();
-        }
-
-        return -1;
+        // Get from cache (guaranteed to exist after getShortestPath call)
+        String cacheKey = getCacheKey(start, end);
+        PathResult result = pathCache.get(cacheKey);
+        return result != null ? result.getDistance() : -1;
     }
 
     /**
@@ -289,6 +280,13 @@ public class Graph {
     // ==========================================
     // UPGRADE 4: Cache Statistics Methods
     // ==========================================
+
+    /**
+     * Helper method to create consistent cache keys
+     */
+    private String getCacheKey(String from, String to) {
+        return from + "|" + to;
+    }
 
     public void clearCache() {
         pathCache.clear();

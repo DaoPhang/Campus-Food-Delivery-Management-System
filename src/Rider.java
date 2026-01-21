@@ -65,24 +65,8 @@ public class Rider {
                 riderID, name, currentLocation, status, jobsCompleted);
     }
 
-    public String getRiderID() {
-        return riderID;
-    }
-
-    public void setRiderID(String riderID) {
-        this.riderID = riderID;
-    }
-
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getCurrentLocation() {
-        return currentLocation;
-    }
-
-    public void setCurrentLocation(String currentLocation) {
-        this.currentLocation = currentLocation;
     }
 
     public void setCurrentOrderId(String orderId) {

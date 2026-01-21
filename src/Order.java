@@ -36,7 +36,6 @@ public class Order implements Comparable<Order> {
 
     // Getters
     public String getId() { return orderId; }
-    public String getOrderId() { return orderId; }
     public String getStudentName() { return studentName; }
     public String getPickupLocation() { return pickupLocation; }
     public String getDeliveryLocation() { return deliveryLocation; }
