@@ -9,7 +9,8 @@ public class Order implements Comparable<Order> {
     private String deliveryLocation;
     private int priority; // Lower number = higher priority
     private String status; // Pending, Delivering, Delivered, Cancelled
-
+    private long timestamp;
+    
     public Order(String orderId, String studentName, String pickupLocation, 
                  String deliveryLocation, int priority) {
         this.orderId = orderId;
@@ -18,6 +19,7 @@ public class Order implements Comparable<Order> {
         this.deliveryLocation = deliveryLocation;
         this.priority = priority;
         this.status = "Pending";
+        this.timestamp = System.nanoTime();
     }
 
     // Constructor with status (for file loading)
@@ -29,6 +31,7 @@ public class Order implements Comparable<Order> {
         this.deliveryLocation = deliveryLocation;
         this.priority = priority;
         this.status = status;
+        this.timestamp = System.nanoTime();
     }
 
     // Getters
@@ -50,10 +53,13 @@ public class Order implements Comparable<Order> {
 
     @Override
     public int compareTo(Order other) {
-        // Lower priority number = higher priority (comes first)
-        return Integer.compare(this.priority, other.priority);
+        if (this.priority != other.priority) {
+            return Integer.compare(this.priority, other.priority);
+        }
+        // If priorities are same, compare time (First Come First Served)
+        return Long.compare(this.timestamp, other.timestamp);
     }
-
+    
     @Override
     public String toString() {
         return String.format("[Order: %s] %s | From: %s → To: %s | Priority: %d | Status: %s",
