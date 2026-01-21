@@ -1,8 +1,7 @@
-import java.util.List;
-
 /**
  * CampusMap is a wrapper class for Graph that provides
  * simplified interface for the dispatch system
+ * Uses manual array-based implementations
  */
 public class CampusMap {
     private Graph graph;
@@ -59,16 +58,25 @@ public class CampusMap {
 
     /**
      * Get the shortest path between two locations
+     * @param from starting location
+     * @param to destination location
+     * @param pathLengthOut output array to store path length (optional)
+     * @return array of location names in the path
      */
-    public List<String> getShortestPath(String from, String to) {
-        return graph.getShortestPath(from, to);
+    public String[] getShortestPath(String from, String to, int[] pathLengthOut) {
+        return graph.getShortestPath(from, to, pathLengthOut);
     }
 
     /**
-     * Get delivery route: rider → pickup → delivery
+     * Get delivery route: rider -> pickup -> delivery
+     * @param riderLoc rider's current location
+     * @param pickup pickup location
+     * @param delivery delivery destination
+     * @param pathLengthOut output array to store path length (optional)
+     * @return array of location names in the full route
      */
-    public List<String> getDeliveryRoute(String riderLoc, String pickup, String delivery) {
-        return graph.getDeliveryRoute(riderLoc, pickup, delivery);
+    public String[] getDeliveryRoute(String riderLoc, String pickup, String delivery, int[] pathLengthOut) {
+        return graph.getDeliveryRoute(riderLoc, pickup, delivery, pathLengthOut);
     }
 
     /**
@@ -92,5 +100,19 @@ public class CampusMap {
      */
     public void loadRoutes(String filename) {
         graph.loadRoutes(filename);
+    }
+
+    /**
+     * Check if location exists
+     */
+    public boolean hasLocation(String name) {
+        return graph.hasLocation(name);
+    }
+
+    /**
+     * Get all location names
+     */
+    public String[] getAllLocations(int[] countOut) {
+        return graph.getAllLocations(countOut);
     }
 }

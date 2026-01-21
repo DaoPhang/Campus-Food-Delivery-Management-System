@@ -183,13 +183,14 @@ public class Main {
     private static void searchOrdersByStudentName() {
         System.out.print("Enter Student Name: ");
         String name = scanner.nextLine().trim();
-        java.util.List<Order> results = orderSystem.searchByStudentName(name);
+        int[] count = new int[1];
+        Order[] results = orderSystem.searchByStudentName(name, count);
         System.out.println("\n=== Search Results for: " + name + " ===");
-        if (results.isEmpty()) {
+        if (count[0] == 0) {
             System.out.println("No orders found for student: " + name);
         } else {
-            for (Order order : results) {
-                System.out.println(order);
+            for (int i = 0; i < count[0]; i++) {
+                System.out.println(results[i]);
             }
         }
         System.out.println("=====================================\n");
@@ -471,15 +472,16 @@ public class Main {
         String to = scanner.nextLine().trim();
 
         System.out.println("\n[UPGRADE 4] Checking cache...");
-        java.util.List<String> path = campusMap.getShortestPath(from, to);
+        int[] length = new int[1];
+        String[] path = campusMap.getShortestPath(from, to, length);
 
-        if (path.isEmpty()) {
+        if (length[0] == 0) {
             System.out.println("No path found between " + from + " and " + to);
         } else {
             System.out.print("Shortest Path: ");
-            for (int i = 0; i < path.size(); i++) {
-                System.out.print(path.get(i));
-                if (i < path.size() - 1)
+            for (int i = 0; i < length[0]; i++) {
+                System.out.print(path[i]);
+                if (i < length[0] - 1)
                     System.out.print(" → ");
             }
             System.out.println();

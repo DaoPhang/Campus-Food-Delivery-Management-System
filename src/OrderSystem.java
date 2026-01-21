@@ -1,69 +1,149 @@
 import java.io.*;
-import java.util.*;
 
 /**
- * OrderSystem manages orders using a PriorityQueue for efficient dispatching
- * and a HashMap for O(1) order lookup by ID
+ * OrderSystem manages orders using manual array-based implementations
+ * Uses FIFO queue for pending orders and array for order lookup
  */
 public class OrderSystem {
-    private PriorityQueue<Order> orderQueue; // Pending orders sorted by priority
-    private HashMap<String, Order> orderMap; // All orders for quick lookup
-    private List<Order> allOrders; // All orders including completed ones
+    private static final int MAX_ORDERS = 200;
+
+    // Manual FIFO queue for pending orders
+    private Order[] orderQueue;
+    private int front;
+    private int rear;
+
+    // All orders array for lookup
+    private Order[] allOrders;
+    private int orderCount;
 
     public OrderSystem() {
-        this.orderQueue = new PriorityQueue<>();
-        this.orderMap = new HashMap<>();
-        this.allOrders = new ArrayList<>();
+        this.orderQueue = new Order[MAX_ORDERS];
+        this.front = 0;
+        this.rear = 0;
+
+        this.allOrders = new Order[MAX_ORDERS];
+        this.orderCount = 0;
+    }
+
+    /**
+     * Search for order by ID - linear search
+     */
+    public Order searchOrder(String orderID) {
+        for (int i = 0; i < orderCount; i++) {
+            if (allOrders[i].getId().equals(orderID)) {
+                return allOrders[i];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check if order ID already exists
+     */
+    private boolean orderExists(String orderID) {
+        return searchOrder(orderID) != null;
     }
 
     /**
      * Add a new order to the system
      */
     public void addOrder(Order order) {
-        if (orderMap.containsKey(order.getId())) {
+        if (orderExists(order.getId())) {
             System.out.println("Error: Order ID " + order.getId() + " already exists.");
             return;
         }
-        orderMap.put(order.getId(), order);
-        allOrders.add(order);
+
+        if (orderCount >= MAX_ORDERS) {
+            System.out.println("Error: Maximum order capacity reached.");
+            return;
+        }
+
+        // Add to all orders array
+        allOrders[orderCount++] = order;
+
+        // If pending, add to queue
         if (order.getStatus().equals("Pending")) {
-            orderQueue.offer(order);
+            enqueue(order);
         }
     }
 
     /**
-     * Get the next pending order without removing it
+     * Enqueue order to FIFO queue (sorted by priority - lower number = higher priority)
+     */
+    private void enqueue(Order newOrder) {
+        if (rear >= MAX_ORDERS) {
+            System.out.println("Error: Queue is full.");
+            return;
+        }
+
+        // Insert sorted by priority (insertion sort style)
+        int insertPos = rear;
+        
+        // Find correct position based on priority
+        for (int i = front; i < rear; i++) {
+            if (newOrder.getPriority() < orderQueue[i].getPriority()) {
+                insertPos = i;
+                break;
+            }
+        }
+
+        // Shift elements to make room
+        for (int i = rear; i > insertPos; i--) {
+            orderQueue[i] = orderQueue[i - 1];
+        }
+
+        orderQueue[insertPos] = newOrder;
+        rear++;
+    }
+
+    /**
+     * Dequeue - remove and return front order
+     */
+    private Order dequeue() {
+        if (front >= rear) {
+            return null;
+        }
+
+        Order order = orderQueue[front];
+
+        // Shift remaining elements
+        for (int i = front; i < rear - 1; i++) {
+            orderQueue[i] = orderQueue[i + 1];
+        }
+        rear--;
+
+        return order;
+    }
+
+    /**
+     * Get the next pending order without removing it (peek)
      */
     public Order getNextPendingOrder() {
-        return orderQueue.peek();
+        if (front >= rear) {
+            return null;
+        }
+        return orderQueue[front];
     }
 
     /**
      * Remove and return the next pending order
      */
     public Order pollPriorityQueue() {
-        return orderQueue.poll();
-    }
-
-    /**
-     * Search for an order by ID - O(1) lookup
-     */
-    public Order searchOrder(String orderID) {
-        return orderMap.get(orderID);
+        return dequeue();
     }
 
     /**
      * Get number of pending orders
      */
     public int getPendingCount() {
-        return orderQueue.size();
+        return rear - front;
     }
 
     /**
      * Get total number of orders
      */
     public int getTotalCount() {
-        return allOrders.size();
+        return orderCount;
     }
 
     /**
@@ -71,11 +151,11 @@ public class OrderSystem {
      */
     public void displayAllOrders() {
         System.out.println("\n=== All Orders ===");
-        if (allOrders.isEmpty()) {
+        if (orderCount == 0) {
             System.out.println("No orders in the system.");
         } else {
-            for (Order order : allOrders) {
-                System.out.println(order);
+            for (int i = 0; i < orderCount; i++) {
+                System.out.println(allOrders[i]);
             }
         }
         System.out.println("==================\n");
@@ -86,13 +166,11 @@ public class OrderSystem {
      */
     public void displayPendingOrders() {
         System.out.println("\n=== Pending Orders ===");
-        if (orderQueue.isEmpty()) {
+        if (front >= rear) {
             System.out.println("No pending orders.");
         } else {
-            // Create a copy to iterate without modifying original
-            PriorityQueue<Order> copy = new PriorityQueue<>(orderQueue);
-            while (!copy.isEmpty()) {
-                System.out.println(copy.poll());
+            for (int i = front; i < rear; i++) {
+                System.out.println(orderQueue[i]);
             }
         }
         System.out.println("======================\n");
@@ -103,7 +181,7 @@ public class OrderSystem {
      */
     public void readdToPendingQueue(Order order) {
         if (order != null && order.getStatus().equals("Pending")) {
-            orderQueue.offer(order);
+            enqueue(order);
         }
     }
 
@@ -117,8 +195,7 @@ public class OrderSystem {
             int count = 0;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty())
-                    continue;
+                if (line.isEmpty()) continue;
 
                 String[] parts = line.split(",");
                 if (parts.length >= 5) {
@@ -149,36 +226,45 @@ public class OrderSystem {
      */
     public void saveOrders(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            for (Order order : allOrders) {
-                writer.println(order.toFileFormat());
+            for (int i = 0; i < orderCount; i++) {
+                writer.println(allOrders[i].toFileFormat());
             }
-            System.out.println("Saved " + allOrders.size() + " orders to " + filename);
+            System.out.println("Saved " + orderCount + " orders to " + filename);
         } catch (IOException e) {
             System.out.println("Error saving orders: " + e.getMessage());
         }
     }
 
     /**
-     * Get all orders list
+     * Get all orders as array
      */
-    public List<Order> getAllOrders() {
-        return allOrders;
+    public Order[] getAllOrders() {
+        Order[] result = new Order[orderCount];
+        for (int i = 0; i < orderCount; i++) {
+            result[i] = allOrders[i];
+        }
+        return result;
+    }
+
+    /**
+     * Get order count
+     */
+    public int getOrderCount() {
+        return orderCount;
     }
 
     /**
      * Cancel an order by ID
-     * If the order is in the pending queue, remove it
-     * @return the cancelled order, or null if not found
      */
     public Order cancelOrder(String orderId) {
-        Order order = orderMap.get(orderId);
+        Order order = searchOrder(orderId);
         if (order == null) {
             return null;
         }
 
-        // If order is pending, remove from priority queue
+        // If order is pending, remove from queue
         if (order.getStatus().equals("Pending")) {
-            orderQueue.remove(order);
+            removeFromQueue(order);
         }
 
         // Update status to Cancelled
@@ -187,30 +273,61 @@ public class OrderSystem {
     }
 
     /**
-     * Search orders by student name (case-insensitive partial match)
-     * @return list of matching orders
+     * Remove specific order from queue
      */
-    public List<Order> searchByStudentName(String name) {
-        List<Order> results = new ArrayList<>();
-        String searchName = name.toLowerCase();
-        for (Order order : allOrders) {
-            if (order.getStudentName().toLowerCase().contains(searchName)) {
-                results.add(order);
+    private void removeFromQueue(Order order) {
+        int removeIdx = -1;
+        for (int i = front; i < rear; i++) {
+            if (orderQueue[i].getId().equals(order.getId())) {
+                removeIdx = i;
+                break;
             }
+        }
+
+        if (removeIdx != -1) {
+            // Shift elements
+            for (int i = removeIdx; i < rear - 1; i++) {
+                orderQueue[i] = orderQueue[i + 1];
+            }
+            rear--;
+        }
+    }
+
+    /**
+     * Search orders by student name (returns matching orders)
+     */
+    public Order[] searchByStudentName(String name, int[] countOut) {
+        Order[] results = new Order[orderCount];
+        int resultCount = 0;
+        String searchName = name.toLowerCase();
+
+        for (int i = 0; i < orderCount; i++) {
+            if (allOrders[i].getStudentName().toLowerCase().contains(searchName)) {
+                results[resultCount++] = allOrders[i];
+            }
+        }
+
+        if (countOut != null && countOut.length > 0) {
+            countOut[0] = resultCount;
         }
         return results;
     }
 
     /**
      * Search orders by status
-     * @return list of orders with matching status
      */
-    public List<Order> searchByStatus(String status) {
-        List<Order> results = new ArrayList<>();
-        for (Order order : allOrders) {
-            if (order.getStatus().equalsIgnoreCase(status)) {
-                results.add(order);
+    public Order[] searchByStatus(String status, int[] countOut) {
+        Order[] results = new Order[orderCount];
+        int resultCount = 0;
+
+        for (int i = 0; i < orderCount; i++) {
+            if (allOrders[i].getStatus().equalsIgnoreCase(status)) {
+                results[resultCount++] = allOrders[i];
             }
+        }
+
+        if (countOut != null && countOut.length > 0) {
+            countOut[0] = resultCount;
         }
         return results;
     }
@@ -220,12 +337,14 @@ public class OrderSystem {
      */
     public void displayOrdersByStatus(String status) {
         System.out.println("\n=== Orders with Status: " + status + " ===");
-        List<Order> filtered = searchByStatus(status);
-        if (filtered.isEmpty()) {
+        int[] count = new int[1];
+        Order[] filtered = searchByStatus(status, count);
+
+        if (count[0] == 0) {
             System.out.println("No orders found with status: " + status);
         } else {
-            for (Order order : filtered) {
-                System.out.println(order);
+            for (int i = 0; i < count[0]; i++) {
+                System.out.println(filtered[i]);
             }
         }
         System.out.println("=====================================\n");
@@ -236,8 +355,8 @@ public class OrderSystem {
      */
     public int getCountByStatus(String status) {
         int count = 0;
-        for (Order order : allOrders) {
-            if (order.getStatus().equalsIgnoreCase(status)) {
+        for (int i = 0; i < orderCount; i++) {
+            if (allOrders[i].getStatus().equalsIgnoreCase(status)) {
                 count++;
             }
         }

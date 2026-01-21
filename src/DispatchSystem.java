@@ -1,4 +1,3 @@
-import java.util.*;
 import java.io.*;
 
 /**
@@ -9,12 +8,17 @@ import java.io.*;
  * UPGRADE 5: Performance statistics tracking
  */
 public class DispatchSystem {
-    private ArrayList<Rider> riderList;
-    private HashMap<String, Rider> riderMap;
+    // Manual array-based rider list
+    private Rider[] riderList;
+    private int riderCount;
+    private static final int MAX_RIDERS = 100;
 
-    // UPGRADE 3: Undo/Redo stacks
-    private Stack<DispatchAction> undoStack;
-    private Stack<DispatchAction> redoStack;
+    // Manual array-based undo/redo stacks
+    private DispatchAction[] undoStack;
+    private int undoTop;
+    private DispatchAction[] redoStack;
+    private int redoTop;
+    private static final int MAX_STACK_SIZE = 50;
 
     // UPGRADE 5: Performance statistics
     private int totalOrdersDispatched;
@@ -26,29 +30,41 @@ public class DispatchSystem {
     private static final double GAMMA = 0.5; // Fairness (idle riders preferred)
 
     public DispatchSystem() {
-        this.riderList = new ArrayList<>();
-        this.riderMap = new HashMap<>();
-        this.undoStack = new Stack<>();
-        this.redoStack = new Stack<>();
+        // Initialize manual arrays
+        this.riderList = new Rider[MAX_RIDERS];
+        this.riderCount = 0;
+        
+        // Initialize undo/redo stacks
+        this.undoStack = new DispatchAction[MAX_STACK_SIZE];
+        this.undoTop = 0;
+        this.redoStack = new DispatchAction[MAX_STACK_SIZE];
+        this.redoTop = 0;
+        
         this.totalOrdersDispatched = 0;
         this.totalDistanceAssigned = 0.0;
     }
 
     public void addRider(Rider rider) {
-        riderList.add(rider);
-        riderMap.put(rider.getId(), rider);
+        if (riderCount < MAX_RIDERS) {
+            riderList[riderCount++] = rider;
+        }
     }
 
     public Rider getRider(String id) {
-        return riderMap.get(id);
+        for (int i = 0; i < riderCount; i++) {
+            if (riderList[i].getId().equals(id)) {
+                return riderList[i];
+            }
+        }
+        return null;
     }
 
     public void displayAvailableRiders() {
         System.out.println("--- Available Riders ---");
         boolean found = false;
-        for (Rider r : riderList) {
-            if (r.getStatus() == Rider.RiderStatus.AVAILABLE) {
-                System.out.println(r);
+        for (int i = 0; i < riderCount; i++) {
+            if (riderList[i].getStatus() == Rider.RiderStatus.AVAILABLE) {
+                System.out.println(riderList[i]);
                 found = true;
             }
         }
@@ -57,23 +73,31 @@ public class DispatchSystem {
         }
     }
 
-    public List<Rider> listAvailableRiders() {
-        List<Rider> available = new ArrayList<>();
-        for (Rider r : riderList) {
-            if (r.getStatus() == Rider.RiderStatus.AVAILABLE) {
-                available.add(r);
+    /**
+     * Get available riders as an array
+     * Returns array and sets count in the provided int array (index 0)
+     */
+    public Rider[] listAvailableRiders(int[] countOut) {
+        Rider[] available = new Rider[riderCount];
+        int availableCount = 0;
+        for (int i = 0; i < riderCount; i++) {
+            if (riderList[i].getStatus() == Rider.RiderStatus.AVAILABLE) {
+                available[availableCount++] = riderList[i];
             }
+        }
+        if (countOut != null && countOut.length > 0) {
+            countOut[0] = availableCount;
         }
         return available;
     }
 
     public void displayAllRiders() {
         System.out.println("\n=== All Riders ===");
-        if (riderList.isEmpty()) {
+        if (riderCount == 0) {
             System.out.println("No riders registered.");
         } else {
-            for (Rider r : riderList) {
-                System.out.println(r.toDetailedString());
+            for (int i = 0; i < riderCount; i++) {
+                System.out.println(riderList[i].toDetailedString());
             }
         }
         System.out.println("=================\n");
@@ -81,8 +105,8 @@ public class DispatchSystem {
 
     public int getAvailableRiderCount() {
         int count = 0;
-        for (Rider r : riderList) {
-            if (r.getStatus() == Rider.RiderStatus.AVAILABLE) {
+        for (int i = 0; i < riderCount; i++) {
+            if (riderList[i].getStatus() == Rider.RiderStatus.AVAILABLE) {
                 count++;
             }
         }
@@ -117,7 +141,8 @@ public class DispatchSystem {
 
         System.out.println("\n--- Calculating Weighted Scores ---");
 
-        for (Rider rider : riderList) {
+        for (int i = 0; i < riderCount; i++) {
+            Rider rider = riderList[i];
             if (rider.getStatus() != Rider.RiderStatus.AVAILABLE)
                 continue;
 
@@ -169,12 +194,14 @@ public class DispatchSystem {
         bestRider.setCurrentOrderId(nextOrder.getId());
         nextOrder.setStatus("Delivering");
 
-        // 8. UPGRADE 3: Push to undo stack
+        // 8. UPGRADE 3: Push to undo stack (manual array-based)
         DispatchAction action = new DispatchAction(
                 nextOrder.getId(), bestRider.getId(),
                 previousRiderLocation, previousOrderStatus, totalDistance);
-        undoStack.push(action);
-        redoStack.clear(); // Clear redo history on new action
+        if (undoTop < MAX_STACK_SIZE) {
+            undoStack[undoTop++] = action;
+        }
+        redoTop = 0; // Clear redo history on new action
 
         // 9. UPGRADE 5: Update statistics
         totalOrdersDispatched++;
@@ -188,19 +215,8 @@ public class DispatchSystem {
         System.out.println("Selection Score: " + String.format("%.2f", bestScore));
         System.out.println("\n--- Delivery Route ---");
 
-        // Display path
-        List<String> fullPath = map.getDeliveryRoute(previousRiderLocation, pickupLoc, deliveryLoc);
-        if (!fullPath.isEmpty()) {
-            System.out.print("Path: ");
-            for (int i = 0; i < fullPath.size(); i++) {
-                System.out.print(fullPath.get(i));
-                if (i < fullPath.size() - 1)
-                    System.out.print(" → ");
-            }
-            System.out.println();
-        } else {
-            System.out.println("Route: " + previousRiderLocation + " → " + pickupLoc + " → " + deliveryLoc);
-        }
+        // Display path (simplified - shows route summary)
+        System.out.println("Route: " + previousRiderLocation + " → " + pickupLoc + " → " + deliveryLoc);
 
         System.out.println("Distance to Pickup: " + bestDistToPickup + " km");
         System.out.println("Distance to Delivery: " + bestDistToDelivery + " km");
@@ -228,7 +244,8 @@ public class DispatchSystem {
 
         // 2. Find which rider has THIS SPECIFIC order
         Rider assignedRider = null;
-        for (Rider r : riderList) {
+        for (int i = 0; i < riderCount; i++) {
+            Rider r = riderList[i];
             if (r.getStatus() == Rider.RiderStatus.DELIVERING &&
                     r.getCurrentOrderId() != null &&
                     r.getCurrentOrderId().equals(orderID)) {
@@ -281,18 +298,20 @@ public class DispatchSystem {
      * Undo the last dispatch action
      */
     public void undoLastDispatch(OrderSystem orderSystem) {
-        if (undoStack.isEmpty()) {
+        if (undoTop == 0) {
             System.out.println("Nothing to undo. Undo stack is empty.");
             return;
         }
 
-        DispatchAction action = undoStack.pop();
+        DispatchAction action = undoStack[--undoTop];
 
         // Find the rider
         Rider rider = getRider(action.getRiderId());
         if (rider == null) {
             System.out.println("Error: Rider not found for undo.");
-            redoStack.push(action); // Put it back
+            if (redoTop < MAX_STACK_SIZE) {
+                redoStack[redoTop++] = action; // Put it back
+            }
             return;
         }
 
@@ -300,7 +319,9 @@ public class DispatchSystem {
         Order order = orderSystem.searchOrder(action.getOrderId());
         if (order == null) {
             System.out.println("Error: Order not found for undo.");
-            redoStack.push(action);
+            if (redoTop < MAX_STACK_SIZE) {
+                redoStack[redoTop++] = action;
+            }
             return;
         }
 
@@ -314,7 +335,9 @@ public class DispatchSystem {
         orderSystem.readdToPendingQueue(order);
 
         // Push to redo stack
-        redoStack.push(action);
+        if (redoTop < MAX_STACK_SIZE) {
+            redoStack[redoTop++] = action;
+        }
 
         // Update statistics
         totalOrdersDispatched--;
@@ -331,12 +354,12 @@ public class DispatchSystem {
      * Redo the last undone dispatch action
      */
     public void redoLastDispatch(OrderSystem orderSystem, CampusMap map) {
-        if (redoStack.isEmpty()) {
+        if (redoTop == 0) {
             System.out.println("Nothing to redo. Redo stack is empty.");
             return;
         }
 
-        DispatchAction action = redoStack.pop();
+        DispatchAction action = redoStack[--redoTop];
 
         // Find the order in pending queue
         Order order = orderSystem.searchOrder(action.getOrderId());
@@ -361,7 +384,9 @@ public class DispatchSystem {
         order.setStatus("Delivering");
 
         // Push back to undo stack
-        undoStack.push(action);
+        if (undoTop < MAX_STACK_SIZE) {
+            undoStack[undoTop++] = action;
+        }
 
         // Update statistics
         totalOrdersDispatched++;
@@ -376,28 +401,28 @@ public class DispatchSystem {
      * Check if undo is possible
      */
     public boolean canUndo() {
-        return !undoStack.isEmpty();
+        return undoTop > 0;
     }
 
     /**
      * Check if redo is possible
      */
     public boolean canRedo() {
-        return !redoStack.isEmpty();
+        return redoTop > 0;
     }
 
     /**
      * Get undo stack size
      */
     public int getUndoStackSize() {
-        return undoStack.size();
+        return undoTop;
     }
 
     /**
      * Get redo stack size
      */
     public int getRedoStackSize() {
-        return redoStack.size();
+        return redoTop;
     }
 
     // ==========================================
@@ -441,10 +466,10 @@ public class DispatchSystem {
      */
     public void saveRiders(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            for (Rider rider : riderList) {
-                writer.println(rider.toFileFormat());
+            for (int i = 0; i < riderCount; i++) {
+                writer.println(riderList[i].toFileFormat());
             }
-            System.out.println("Saved " + riderList.size() + " riders to " + filename);
+            System.out.println("Saved " + riderCount + " riders to " + filename);
         } catch (IOException e) {
             System.out.println("Error saving riders: " + e.getMessage());
         }
@@ -469,7 +494,7 @@ public class DispatchSystem {
     }
 
     public int getTotalRiders() {
-        return riderList.size();
+        return riderCount;
     }
 
     /**
@@ -477,20 +502,31 @@ public class DispatchSystem {
      */
     public void displayDispatchStatistics() {
         System.out.println("\n=== Dispatch System Statistics ===");
-        System.out.println("Total Riders: " + riderList.size());
+        System.out.println("Total Riders: " + riderCount);
         System.out.println("Available Riders: " + getAvailableRiderCount());
         System.out.println("Orders Dispatched: " + totalOrdersDispatched);
         System.out.printf("Total Distance Assigned: %.1f km%n", totalDistanceAssigned);
         System.out.printf("Average Distance per Order: %.1f km%n", getAverageDistancePerOrder());
-        System.out.println("Undo Stack Size: " + undoStack.size());
-        System.out.println("Redo Stack Size: " + redoStack.size());
+        System.out.println("Undo Stack Size: " + undoTop);
+        System.out.println("Redo Stack Size: " + redoTop);
         System.out.println("==================================\n");
     }
 
     /**
-     * Get all riders list
+     * Get all riders as array
      */
-    public List<Rider> getAllRiders() {
-        return riderList;
+    public Rider[] getAllRiders() {
+        Rider[] result = new Rider[riderCount];
+        for (int i = 0; i < riderCount; i++) {
+            result[i] = riderList[i];
+        }
+        return result;
+    }
+
+    /**
+     * Get rider count
+     */
+    public int getRiderCount() {
+        return riderCount;
     }
 }

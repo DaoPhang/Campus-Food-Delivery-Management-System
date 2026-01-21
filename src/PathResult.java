@@ -1,33 +1,33 @@
-import java.util.List;
-import java.util.ArrayList;
-
-/**
- * PathResult stores cached path computation results
- * Used for HashMap caching optimization in Graph
- */
 public class PathResult {
-    private final int distance;
-    private final List<String> path;
+    private int[] pathNodes;
+    private int pathSize;
+    private int totalDistance;
 
-    public PathResult(int distance, List<String> path) {
-        this.distance = distance;
-        this.path = new ArrayList<>(path); // Defensive copy
+    public PathResult(int maxNodes) {
+        this.pathNodes = new int[maxNodes];
+        this.pathSize = 0;
+        this.totalDistance = -1;
     }
 
-    public int getDistance() {
-        return distance;
+    public void addNode(int nodeIndex) {
+        if (pathSize < pathNodes.length) {
+            pathNodes[pathSize++] = nodeIndex;
+        }
     }
 
-    public List<String> getPath() {
-        return new ArrayList<>(path); // Return copy to prevent modification
+    public int getNode(int index) {
+        return pathNodes[index];
     }
 
-    public boolean hasPath() {
-        return !path.isEmpty();
+    public int getPathSize() {
+        return pathSize;
     }
 
-    @Override
-    public String toString() {
-        return "PathResult{distance=" + distance + ", path=" + path + "}";
+    public void setTotalDistance(int dist) {
+        this.totalDistance = dist;
+    }
+
+    public int getTotalDistance() {
+        return totalDistance;
     }
 }

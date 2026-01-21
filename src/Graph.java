@@ -1,18 +1,31 @@
-import java.util.*;
 import java.io.*;
 
 /**
  * Graph class implementing campus map with Dijkstra's shortest path algorithm
- * UPGRADE 4: Path caching with HashMap optimization
+ * Uses manual array-based implementations instead of Java Collections
+ * UPGRADE 4: Path caching optimization
  * UPGRADE 2: File persistence for locations and routes
  * UPGRADE 5: Statistics tracking for Dijkstra calls
  */
 public class Graph {
-    private final Map<String, List<Edge>> adjacencyList;
-    private final Map<String, Location> locationInfoMap;
+    // Constants
+    private static final int MAX_NODES = 500;  // Increased for safety
+    private static final int MAX_EDGES = 20;   // Max edges per node
+    private static final int MAX_CACHE = 1000; // Max cached paths
 
-    // UPGRADE 4: Path caching
-    private final Map<String, PathResult> pathCache;
+    // Manual adjacency list: Edge[nodeIndex][edgeIndex]
+    private Edge[][] adjList;
+    private int[] edgeCount;
+
+    // Node name to index mapping
+    private String[] nodeNames;
+    private Location[] nodeLocations;
+    private int nodeCount;
+
+    // UPGRADE 4: Path caching (manual array-based)
+    private String[] cacheKeys;
+    private PathResult[] cacheValues;
+    private int cacheCount;
     private int cacheHits;
     private int cacheMisses;
 
@@ -20,43 +33,85 @@ public class Graph {
     private int dijkstraCallCount;
 
     public Graph() {
-        this.adjacencyList = new HashMap<>();
-        this.locationInfoMap = new HashMap<>();
-        this.pathCache = new HashMap<>();
+        this.adjList = new Edge[MAX_NODES][MAX_EDGES];
+        this.edgeCount = new int[MAX_NODES];
+        this.nodeNames = new String[MAX_NODES];
+        this.nodeLocations = new Location[MAX_NODES];
+        this.nodeCount = 0;
+
+        this.cacheKeys = new String[MAX_CACHE];
+        this.cacheValues = new PathResult[MAX_CACHE];
+        this.cacheCount = 0;
         this.cacheHits = 0;
         this.cacheMisses = 0;
         this.dijkstraCallCount = 0;
     }
 
-    public void addLocation(String name, Location loc) {
-        adjacencyList.putIfAbsent(name, new ArrayList<>());
-        locationInfoMap.put(name, loc);
-        // Invalidate cache when graph structure changes
-        clearCache();
+    /**
+     * Get node index by name, returns -1 if not found
+     */
+    private int getNodeIndex(String name) {
+        for (int i = 0; i < nodeCount; i++) {
+            if (nodeNames[i].equals(name)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
+    /**
+     * Add a location to the graph
+     */
+    public void addLocation(String name, Location loc) {
+        if (getNodeIndex(name) == -1 && nodeCount < MAX_NODES) {
+            nodeNames[nodeCount] = name;
+            nodeLocations[nodeCount] = loc;
+            edgeCount[nodeCount] = 0;
+            nodeCount++;
+            clearCache();
+        }
+    }
+
+    /**
+     * Add an edge between two nodes (by name)
+     */
     public void addEdge(String from, String to, int distance) {
         if (distance <= 0) {
             System.out.println("Distance must be a positive integer.");
             return;
         }
-        if (!adjacencyList.containsKey(from) || !adjacencyList.containsKey(to)) {
+
+        int fromIdx = getNodeIndex(from);
+        int toIdx = getNodeIndex(to);
+
+        if (fromIdx == -1 || toIdx == -1) {
             throw new IllegalArgumentException("Both locations must exist in the graph.");
         }
-        adjacencyList.get(from).add(new Edge(to, distance));
-        adjacencyList.get(to).add(new Edge(from, distance));
-        // Invalidate cache when graph structure changes
+
+        // Add edge from -> to
+        if (edgeCount[fromIdx] < MAX_EDGES) {
+            adjList[fromIdx][edgeCount[fromIdx]++] = new Edge(to, distance);
+        }
+
+        // Add edge to -> from (undirected graph)
+        if (edgeCount[toIdx] < MAX_EDGES) {
+            adjList[toIdx][edgeCount[toIdx]++] = new Edge(from, distance);
+        }
+
         clearCache();
     }
 
+    /**
+     * Display the graph
+     */
     public void displayGraph() {
-        for (String name : adjacencyList.keySet()) {
-            Location loc = locationInfoMap.get(name);
+        for (int i = 0; i < nodeCount; i++) {
+            Location loc = nodeLocations[i];
             String details = (loc != null) ? " (" + loc.getFacultyOrDorm() + " - " + loc.getBlock() + ")" : "";
-            System.out.print(name + details + " -> ");
+            System.out.print(nodeNames[i] + details + " -> ");
 
-            List<Edge> edges = adjacencyList.get(name);
-            for (Edge edge : edges) {
+            for (int j = 0; j < edgeCount[i]; j++) {
+                Edge edge = adjList[i][j];
                 System.out.print("[" + edge.getToNode() + ", " + edge.getWeight() + "] ");
             }
             System.out.println();
@@ -65,47 +120,66 @@ public class Graph {
 
     /**
      * Get shortest path with caching optimization
-     * UPGRADE 4: Uses HashMap cache to avoid repeated Dijkstra calculations
      */
-    public List<String> getShortestPath(String start, String end) {
-        if (!adjacencyList.containsKey(start) || !adjacencyList.containsKey(end)) {
-            return Collections.emptyList();
+    public String[] getShortestPath(String start, String end, int[] pathLengthOut) {
+        int startIdx = getNodeIndex(start);
+        int endIdx = getNodeIndex(end);
+
+        if (startIdx == -1 || endIdx == -1) {
+            if (pathLengthOut != null && pathLengthOut.length > 0) pathLengthOut[0] = 0;
+            return new String[0];
         }
 
         if (start.equals(end)) {
-            return Collections.singletonList(start);
+            if (pathLengthOut != null && pathLengthOut.length > 0) pathLengthOut[0] = 1;
+            String[] result = new String[1];
+            result[0] = start;
+            return result;
         }
 
-        // UPGRADE 4: Check cache first
+        // Check cache first
         String cacheKey = getCacheKey(start, end);
-        if (pathCache.containsKey(cacheKey)) {
+        PathResult cached = getCachedPath(cacheKey);
+        if (cached != null) {
             cacheHits++;
-            return pathCache.get(cacheKey).getPath();
+            if (pathLengthOut != null && pathLengthOut.length > 0) {
+                pathLengthOut[0] = cached.getPathSize();
+            }
+            // Return copy of path
+            String[] result = new String[cached.getPathSize()];
+            for (int i = 0; i < cached.getPathSize(); i++) {
+                result[i] = nodeNames[cached.getNode(i)];
+            }
+            return result;
         }
 
         // Cache miss - run Dijkstra
         cacheMisses++;
         dijkstraCallCount++;
 
-        PathResult result = runDijkstra(start, end);
-        pathCache.put(cacheKey, result);
+        PathResult pathResult = runDijkstra(startIdx, endIdx);
+        putCache(cacheKey, pathResult);
 
-        // Also cache the reverse path (for undirected graph)
-        String reverseCacheKey = getCacheKey(end, start);
-        if (!pathCache.containsKey(reverseCacheKey)) {
-            List<String> reversePath = new ArrayList<>(result.getPath());
-            Collections.reverse(reversePath);
-            pathCache.put(reverseCacheKey, new PathResult(result.getDistance(), reversePath));
+        if (pathLengthOut != null && pathLengthOut.length > 0) {
+            pathLengthOut[0] = pathResult.getPathSize();
         }
 
-        return result.getPath();
+        // Convert node indices to names
+        String[] result = new String[pathResult.getPathSize()];
+        for (int i = 0; i < pathResult.getPathSize(); i++) {
+            result[i] = nodeNames[pathResult.getNode(i)];
+        }
+        return result;
     }
 
     /**
      * Get distance between two locations (with caching)
      */
     public int getPathDistance(String start, String end) {
-        if (!adjacencyList.containsKey(start) || !adjacencyList.containsKey(end)) {
+        int startIdx = getNodeIndex(start);
+        int endIdx = getNodeIndex(end);
+
+        if (startIdx == -1 || endIdx == -1) {
             return -1;
         }
 
@@ -113,92 +187,154 @@ public class Graph {
             return 0;
         }
 
-        // getShortestPath handles caching - just call it and retrieve from cache
-        getShortestPath(start, end);
-
-        // Get from cache (guaranteed to exist after getShortestPath call)
+        // Check cache
         String cacheKey = getCacheKey(start, end);
-        PathResult result = pathCache.get(cacheKey);
-        return result != null ? result.getDistance() : -1;
+        PathResult cached = getCachedPath(cacheKey);
+        if (cached != null) {
+            return cached.getTotalDistance();
+        }
+
+        // Run Dijkstra
+        int[] pathLen = new int[1];
+        getShortestPath(start, end, pathLen);
+
+        // Get from cache now
+        cached = getCachedPath(cacheKey);
+        return cached != null ? cached.getTotalDistance() : -1;
     }
 
     /**
-     * Internal Dijkstra implementation
+     * Internal Dijkstra implementation using manual arrays
      */
-    private PathResult runDijkstra(String start, String end) {
-        Map<String, Integer> distances = new HashMap<>();
-        Map<String, String> previousNodes = new HashMap<>();
-        Set<String> visited = new HashSet<>();
-        PriorityQueue<NodeDistance> pq = new PriorityQueue<>();
+    private PathResult runDijkstra(int startIdx, int endIdx) {
+        // Distance array
+        int[] distances = new int[nodeCount];
+        int[] previousNodes = new int[nodeCount];
+        boolean[] visited = new boolean[nodeCount];
 
-        for (String location : adjacencyList.keySet()) {
-            distances.put(location, Integer.MAX_VALUE);
+        // Initialize
+        for (int i = 0; i < nodeCount; i++) {
+            distances[i] = Integer.MAX_VALUE;
+            previousNodes[i] = -1;
+            visited[i] = false;
         }
-        distances.put(start, 0);
-        pq.add(new NodeDistance(start, 0));
+        distances[startIdx] = 0;
 
-        while (!pq.isEmpty()) {
-            NodeDistance current = pq.poll();
-            String currentNode = current.node;
+        // Manual priority queue (simple array-based min-heap simulation)
+        int[] pqNodes = new int[MAX_NODES * MAX_EDGES];
+        int[] pqDist = new int[MAX_NODES * MAX_EDGES];
+        int pqSize = 0;
 
-            if (visited.contains(currentNode)) {
+        // Add start node
+        pqNodes[pqSize] = startIdx;
+        pqDist[pqSize] = 0;
+        pqSize++;
+
+        while (pqSize > 0) {
+            // Find minimum distance node (linear search - simple approach)
+            int minIdx = 0;
+            for (int i = 1; i < pqSize; i++) {
+                if (pqDist[i] < pqDist[minIdx]) {
+                    minIdx = i;
+                }
+            }
+
+            int currentNode = pqNodes[minIdx];
+            int currentDist = pqDist[minIdx];
+
+            // Remove from queue (swap with last element)
+            pqNodes[minIdx] = pqNodes[pqSize - 1];
+            pqDist[minIdx] = pqDist[pqSize - 1];
+            pqSize--;
+
+            if (visited[currentNode]) {
                 continue;
             }
-            visited.add(currentNode);
+            visited[currentNode] = true;
 
-            if (currentNode.equals(end)) {
+            if (currentNode == endIdx) {
                 break;
             }
 
-            for (Edge edge : adjacencyList.get(currentNode)) {
-                String neighbor = edge.getToNode();
-                if (visited.contains(neighbor))
-                    continue;
+            // Process all edges from current node
+            for (int i = 0; i < edgeCount[currentNode]; i++) {
+                Edge edge = adjList[currentNode][i];
+                int neighborIdx = getNodeIndex(edge.getToNode());
+                if (neighborIdx == -1 || visited[neighborIdx]) continue;
 
-                int newDist = distances.get(currentNode) + edge.getWeight();
+                int newDist = currentDist + edge.getWeight();
 
-                if (newDist < distances.get(neighbor)) {
-                    distances.put(neighbor, newDist);
-                    previousNodes.put(neighbor, currentNode);
-                    pq.add(new NodeDistance(neighbor, newDist));
+                if (newDist < distances[neighborIdx]) {
+                    distances[neighborIdx] = newDist;
+                    previousNodes[neighborIdx] = currentNode;
+
+                    // Add to priority queue
+                    if (pqSize < pqNodes.length) {
+                        pqNodes[pqSize] = neighborIdx;
+                        pqDist[pqSize] = newDist;
+                        pqSize++;
+                    }
                 }
             }
         }
 
-        List<String> path = reconstructPath(previousNodes, start, end);
-        int distance = distances.get(end);
-        if (distance == Integer.MAX_VALUE) {
-            distance = -1;
+        // Reconstruct path using manual stack
+        PathResult result = new PathResult(MAX_NODES);
+
+        if (distances[endIdx] == Integer.MAX_VALUE) {
+            result.setTotalDistance(-1);
+            return result;
         }
 
-        return new PathResult(distance, path);
+        // Use stack to reverse the path
+        int[] stack = new int[MAX_NODES];
+        int top = -1;
+
+        int step = endIdx;
+        while (step != -1) {
+            stack[++top] = step;
+            step = previousNodes[step];
+        }
+
+        // Pop from stack to get correct order
+        while (top >= 0) {
+            result.addNode(stack[top--]);
+        }
+
+        result.setTotalDistance(distances[endIdx]);
+        return result;
     }
 
-    private List<String> reconstructPath(Map<String, String> previousNodes, String start, String end) {
-        LinkedList<String> path = new LinkedList<>();
-        String step = end;
+    /**
+     * Get delivery route: rider -> pickup -> delivery
+     */
+    public String[] getDeliveryRoute(String riderLoc, String restaurant, String customerLoc, int[] pathLengthOut) {
+        int[] firstLegLen = new int[1];
+        int[] secondLegLen = new int[1];
 
-        if (previousNodes.get(step) == null && !step.equals(start)) {
-            return path;
+        String[] firstLeg = getShortestPath(riderLoc, restaurant, firstLegLen);
+        String[] secondLeg = getShortestPath(restaurant, customerLoc, secondLegLen);
+
+        if (firstLegLen[0] == 0 || secondLegLen[0] == 0) {
+            if (pathLengthOut != null && pathLengthOut.length > 0) pathLengthOut[0] = 0;
+            return new String[0];
         }
 
-        while (step != null) {
-            path.addFirst(step);
-            step = previousNodes.get(step);
+        // Combine paths (excluding duplicate restaurant node)
+        int totalLen = firstLegLen[0] + secondLegLen[0] - 1;
+        String[] fullPath = new String[totalLen];
+
+        int idx = 0;
+        for (int i = 0; i < firstLegLen[0]; i++) {
+            fullPath[idx++] = firstLeg[i];
         }
-        return path;
-    }
-
-    public List<String> getDeliveryRoute(String riderLoc, String restaurant, String customerLoc) {
-        List<String> firstLeg = getShortestPath(riderLoc, restaurant);
-        List<String> secondLeg = getShortestPath(restaurant, customerLoc);
-
-        if (firstLeg.isEmpty() || secondLeg.isEmpty()) {
-            return Collections.emptyList();
+        for (int i = 1; i < secondLegLen[0]; i++) {
+            fullPath[idx++] = secondLeg[i];
         }
 
-        List<String> fullPath = new ArrayList<>(firstLeg);
-        fullPath.addAll(secondLeg.subList(1, secondLeg.size()));
+        if (pathLengthOut != null && pathLengthOut.length > 0) {
+            pathLengthOut[0] = totalLen;
+        }
         return fullPath;
     }
 
@@ -206,20 +342,14 @@ public class Graph {
     // UPGRADE 2: File Persistence Methods
     // ==========================================
 
-    /**
-     * Load locations from file
-     * File format: one location name per line
-     */
     public void loadLocations(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             int count = 0;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty())
-                    continue;
+                if (line.isEmpty()) continue;
 
-                // Check if line contains additional info (name,faculty,block)
                 String[] parts = line.split(",");
                 String name = parts[0].trim();
                 String faculty = parts.length > 1 ? parts[1].trim() : "Campus";
@@ -236,18 +366,13 @@ public class Graph {
         }
     }
 
-    /**
-     * Load routes from file
-     * File format: from,to,distance
-     */
     public void loadRoutes(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             int count = 0;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty())
-                    continue;
+                if (line.isEmpty()) continue;
 
                 String[] parts = line.split(",");
                 if (parts.length >= 3) {
@@ -256,10 +381,10 @@ public class Graph {
                     int distance = Integer.parseInt(parts[2].trim());
 
                     // Ensure locations exist before adding edge
-                    if (!adjacencyList.containsKey(from)) {
+                    if (getNodeIndex(from) == -1) {
                         addLocation(from, new Location("Campus", from));
                     }
-                    if (!adjacencyList.containsKey(to)) {
+                    if (getNodeIndex(to) == -1) {
                         addLocation(to, new Location("Campus", to));
                     }
 
@@ -278,18 +403,40 @@ public class Graph {
     }
 
     // ==========================================
-    // UPGRADE 4: Cache Statistics Methods
+    // UPGRADE 4: Cache Methods (Manual Array-Based)
     // ==========================================
 
-    /**
-     * Helper method to create consistent cache keys
-     */
     private String getCacheKey(String from, String to) {
         return from + "|" + to;
     }
 
+    private PathResult getCachedPath(String key) {
+        for (int i = 0; i < cacheCount; i++) {
+            if (cacheKeys[i].equals(key)) {
+                return cacheValues[i];
+            }
+        }
+        return null;
+    }
+
+    private void putCache(String key, PathResult value) {
+        // Check if key exists
+        for (int i = 0; i < cacheCount; i++) {
+            if (cacheKeys[i].equals(key)) {
+                cacheValues[i] = value;
+                return;
+            }
+        }
+        // Add new entry if space available
+        if (cacheCount < MAX_CACHE) {
+            cacheKeys[cacheCount] = key;
+            cacheValues[cacheCount] = value;
+            cacheCount++;
+        }
+    }
+
     public void clearCache() {
-        pathCache.clear();
+        cacheCount = 0;
         cacheHits = 0;
         cacheMisses = 0;
     }
@@ -303,13 +450,12 @@ public class Graph {
     }
 
     public int getCacheSize() {
-        return pathCache.size();
+        return cacheCount;
     }
 
     public double getCacheHitRate() {
         int total = cacheHits + cacheMisses;
-        if (total == 0)
-            return 0.0;
+        if (total == 0) return 0.0;
         return (double) cacheHits / total * 100;
     }
 
@@ -328,16 +474,30 @@ public class Graph {
     }
 
     /**
-     * Get all location names
+     * Get all location names as array
      */
-    public Set<String> getAllLocations() {
-        return adjacencyList.keySet();
+    public String[] getAllLocations(int[] countOut) {
+        if (countOut != null && countOut.length > 0) {
+            countOut[0] = nodeCount;
+        }
+        String[] result = new String[nodeCount];
+        for (int i = 0; i < nodeCount; i++) {
+            result[i] = nodeNames[i];
+        }
+        return result;
+    }
+
+    /**
+     * Get node count
+     */
+    public int getNodeCount() {
+        return nodeCount;
     }
 
     /**
      * Check if location exists
      */
     public boolean hasLocation(String name) {
-        return adjacencyList.containsKey(name);
+        return getNodeIndex(name) != -1;
     }
 }
