@@ -136,11 +136,10 @@ This project implements 5 specific upgrades to the base system:
 
 | Role | Responsibilities | Member Name |
 | :--- | :--- | :--- |
-| **Team Lead** | Project Architecture, Main Menu, Integration | [Name] |
-| **Algorithm Specialist** | Graph Implementation, Dijkstra's Algo, Path Caching | [Name] |
-| **Logic Specialist** | Dispatch Algorithm, Undo/Redo Stacks | [Name] |
-| **Data Specialist** | Order Queue, File I/O, Data Models | [Name] |
-| **QA Specialist** | Testing, Debugging, Statistics Module | [Name] |
+| **Member 1 (Graph & Algorithm)** | Graph Data Structure, Dijkstra's Algorithm, Path Caching, Map Management | [AN JUN LI] |
+| **Member 2 (Orders & Priority)** | Order Queue Implementation, Priority Logic, Order Data Management | [TEOW YAN PING] |
+| **Member 3 (Dispatch & Integration)** | Dispatch Algorithm, Rider Management, Undo/Redo System, System Integration | [TAN DAO PHANG] |
+| **Member 4 (UI & Presentation)** | Main Menu Interface, User Interaction, Documentation, Final Presentation | [YANG PU] |
 
 ---
 
