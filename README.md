@@ -159,7 +159,7 @@ Campus-Food-Delivery-Management-System/
 
 ## 👥 Team Members
 
-- Member 1: Graph & Campus Map
-- Member 2: Orders & Priority System
-- Member 3: Dispatch System & Undo/Redo
-- Member 4: Main Menu & Integration
+- AN JUN LI: Graph & Campus Map
+- TEOW YAN PING: Orders & Priority System
+- TAN DAO PHANG: Dispatch System & Undo/Redo
+- YANG PU: Main Menu & Integration
