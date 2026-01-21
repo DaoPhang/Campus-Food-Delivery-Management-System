@@ -1,20 +1,26 @@
-Cafeteria A,Hostel A,3
-Cafeteria A,Hostel B,5
-Cafeteria A,Faculty of Science,4
-Cafeteria B,Hostel C,2
-Cafeteria B,Faculty of Engineering,3
-Cafeteria B,Library,4
-Hostel A,Hostel B,2
-Hostel B,Hostel C,3
-Hostel A,Faculty of Science,5
-Hostel B,Faculty of Arts,4
-Hostel C,Faculty of Engineering,3
-Faculty of Science,Library,2
-Faculty of Engineering,Library,3
-Faculty of Arts,Library,2
-Library,Student Center,2
-Student Center,Main Gate,4
-Main Gate,Cafeteria A,6
-Main Gate,Sports Complex,3
-Sports Complex,Hostel C,4
-Student Center,Cafeteria B,3
+KK10 Cafeteria,Kolej Kediaman 10,2
+KK10 Cafeteria,Kolej Kediaman 11,4
+KK10 Cafeteria,Faculty of Science UM,5
+
+KK12 Cafeteria,Kolej Kediaman 12,2
+KK12 Cafeteria,Faculty of Engineering UM,4
+KK12 Cafeteria,UM Main Library,5
+
+Kolej Kediaman 10,Kolej Kediaman 11,2
+Kolej Kediaman 11,Kolej Kediaman 12,3
+
+Kolej Kediaman 10,Faculty of Science UM,4
+Kolej Kediaman 11,Faculty of Arts & Social Sciences,4
+Kolej Kediaman 12,Faculty of Engineering UM,3
+
+Faculty of Science UM,UM Main Library,2
+Faculty of Engineering UM,UM Main Library,3
+Faculty of Arts & Social Sciences,UM Main Library,2
+
+UM Main Library,UM Student Centre,2
+UM Student Centre,UM Main Gate,4
+UM Main Gate,KK10 Cafeteria,6
+
+UM Main Gate,UM Sports Centre,3
+UM Sports Centre,Kolej Kediaman 12,4
+UM Student Centre,KK12 Cafeteria,3

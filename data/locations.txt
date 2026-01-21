@@ -1,12 +1,12 @@
-Cafeteria A
-Cafeteria B
-Hostel A
-Hostel B
-Hostel C
-Faculty of Science
-Faculty of Engineering
-Faculty of Arts
-Library
-Sports Complex
-Main Gate
-Student Center
+KK10 Cafeteria
+KK12 Cafeteria
+Kolej Kediaman 10
+Kolej Kediaman 11
+Kolej Kediaman 12
+Faculty of Science UM
+Faculty of Engineering UM
+Faculty of Arts & Social Sciences
+UM Main Library
+UM Sports Centre
+UM Main Gate
+UM Student Centre
