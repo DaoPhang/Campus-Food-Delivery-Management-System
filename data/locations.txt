@@ -1,12 +1,12 @@
-KK10 Cafeteria
-KK12 Cafeteria
-Kolej Kediaman 10
-Kolej Kediaman 11
-Kolej Kediaman 12
-Faculty of Science UM
-Faculty of Engineering UM
-Faculty of Arts & Social Sciences
-UM Main Library
-UM Sports Centre
-UM Main Gate
-UM Student Centre
+FCSIT,Faculty,Block A
+Main Library,Academic,Central Zone
+DTC,Hall,Main Hall
+KK12,Hostel,Raja Dr Nazrin Shah
+KK9,Hostel,Tun Syed Zahiruddin
+Faculty of Science,Faculty,Block S
+Faculty of Engineering,Faculty,Block E
+UM Arena,Sports,Stadium
+Exam Hall,Academic,DTC Complex
+Main Gate KL,Entrance,Gate 1
+PJ Gate,Entrance,Gate 2
+Varsity Lake,Recreation,Zone V

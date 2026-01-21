@@ -1,5 +1,5 @@
-R001,Ali,Kolej Kediaman 10
-R002,Ahmad,KK10 Cafeteria
-R003,Siti,Faculty of Engineering UM
-R004,Mei Ling,UM Main Library
-R005,Raj,UM Student Centre
+O001,Aisyah,Main Library,KK12,1,Pending
+O002,Ben,FCSIT,KK9,2,Pending
+O003,Chong,Faculty of Science,UM Arena,1,Pending
+O004,David,Faculty of Engineering,Main Gate KL,3,Pending
+O005,Elina,DTC,FCSIT,2,Pending
