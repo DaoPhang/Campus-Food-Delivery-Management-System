@@ -113,7 +113,10 @@ public class Main {
             System.out.println("1. Add New Order");
             System.out.println("2. View All Orders");
             System.out.println("3. View Pending Orders");
-            System.out.println("4. Search Order by ID");
+            System.out.println("4. View Orders by Status");
+            System.out.println("5. Search Order by ID");
+            System.out.println("6. Search Orders by Student Name");
+            System.out.println("7. Cancel Order");
             System.out.println("0. Back to Main Menu");
 
             int choice = getIntInput("Enter choice: ");
@@ -129,7 +132,16 @@ public class Main {
                     orderSystem.displayPendingOrders();
                     break;
                 case 4:
+                    viewOrdersByStatus();
+                    break;
+                case 5:
                     searchOrder();
+                    break;
+                case 6:
+                    searchOrdersByStudentName();
+                    break;
+                case 7:
+                    cancelOrder();
                     break;
                 case 0:
                     back = true;
@@ -165,6 +177,73 @@ public class Main {
             System.out.println("Found: " + order);
         } else {
             System.out.println("Order not found.");
+        }
+    }
+
+    private static void searchOrdersByStudentName() {
+        System.out.print("Enter Student Name: ");
+        String name = scanner.nextLine().trim();
+        java.util.List<Order> results = orderSystem.searchByStudentName(name);
+        System.out.println("\n=== Search Results for: " + name + " ===");
+        if (results.isEmpty()) {
+            System.out.println("No orders found for student: " + name);
+        } else {
+            for (Order order : results) {
+                System.out.println(order);
+            }
+        }
+        System.out.println("=====================================\n");
+    }
+
+    private static void viewOrdersByStatus() {
+        System.out.println("\nSelect Status:");
+        System.out.println("1. Pending");
+        System.out.println("2. Delivering");
+        System.out.println("3. Delivered");
+        System.out.println("4. Cancelled");
+        int choice = getIntInput("Enter choice: ");
+        
+        String status;
+        switch (choice) {
+            case 1: status = "Pending"; break;
+            case 2: status = "Delivering"; break;
+            case 3: status = "Delivered"; break;
+            case 4: status = "Cancelled"; break;
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+        orderSystem.displayOrdersByStatus(status);
+    }
+
+    private static void cancelOrder() {
+        System.out.print("Enter Order ID to cancel: ");
+        String orderId = scanner.nextLine().trim();
+        
+        Order order = orderSystem.searchOrder(orderId);
+        if (order == null) {
+            System.out.println("Error: Order " + orderId + " not found.");
+            return;
+        }
+        
+        // Check if order is being delivered - need to reset rider
+        if (order.getStatus().equals("Delivering")) {
+            // Find the rider carrying this order and reset them
+            for (Rider rider : dispatchSystem.getAllRiders()) {
+                if (rider.getCurrentOrderId() != null && rider.getCurrentOrderId().equals(orderId)) {
+                    rider.setStatus(Rider.RiderStatus.AVAILABLE);
+                    rider.setCurrentOrderId(null);
+                    System.out.println("Rider " + rider.getName() + " has been freed.");
+                    break;
+                }
+            }
+        }
+        
+        Order cancelled = orderSystem.cancelOrder(orderId);
+        if (cancelled != null) {
+            System.out.println("\n=== Order Cancelled ===");
+            System.out.println(cancelled);
+            System.out.println("=======================\n");
         }
     }
 
@@ -294,31 +373,39 @@ public class Main {
         while (!back) {
             System.out.println("\n--- Campus Map ---");
             System.out.println("╔═══════════════════════════════════════════╗");
-            System.out.println("║             Path Caching Active           ║");
+            System.out.println("║       Graph-based Location System         ║");
             System.out.println("╚═══════════════════════════════════════════╝");
-            System.out.println("1. Display Full Map");
-            System.out.println("2. Find Shortest Path");
-            System.out.println("3. Get Distance Between Locations");
-            System.out.println("4. View Cache Statistics");
-            System.out.println("5. Clear Path Cache");
+            System.out.println("1. Add New Location");
+            System.out.println("2. Add Route Between Locations");
+            System.out.println("3. Display Full Map (Adjacency List)");
+            System.out.println("4. Find Shortest Path (Dijkstra)");
+            System.out.println("5. Get Distance Between Locations");
+            System.out.println("6. View Cache Statistics");
+            System.out.println("7. Clear Path Cache");
             System.out.println("0. Back to Main Menu");
 
             int choice = getIntInput("Enter choice: ");
 
             switch (choice) {
                 case 1:
-                    campusMap.displayMap();
+                    addLocation();
                     break;
                 case 2:
-                    findShortestPath();
+                    addRoute();
                     break;
                 case 3:
-                    getDistance();
+                    campusMap.displayMap();
                     break;
                 case 4:
-                    displayCacheStats();
+                    findShortestPath();
                     break;
                 case 5:
+                    getDistance();
+                    break;
+                case 6:
+                    displayCacheStats();
+                    break;
+                case 7:
                     campusMap.getGraph().clearCache();
                     System.out.println("Path cache cleared.");
                     break;
@@ -329,6 +416,52 @@ public class Main {
                     System.out.println("Invalid choice.");
             }
         }
+    }
+
+    private static void addLocation() {
+        System.out.println("\n--- Add New Location ---");
+        System.out.print("Location Name: ");
+        String name = scanner.nextLine().trim();
+        
+        if (campusMap.getGraph().hasLocation(name)) {
+            System.out.println("Error: Location '" + name + "' already exists.");
+            return;
+        }
+        
+        System.out.print("Faculty/Dorm (e.g., Faculty, Hostel, Dining): ");
+        String facultyOrDorm = scanner.nextLine().trim();
+        System.out.print("Block/Zone: ");
+        String block = scanner.nextLine().trim();
+        
+        campusMap.addLocation(name, facultyOrDorm, block);
+        System.out.println("Location '" + name + "' added successfully!");
+    }
+
+    private static void addRoute() {
+        System.out.println("\n--- Add Route Between Locations ---");
+        System.out.print("From Location: ");
+        String from = scanner.nextLine().trim();
+        System.out.print("To Location: ");
+        String to = scanner.nextLine().trim();
+        
+        // Validate locations exist
+        if (!campusMap.getGraph().hasLocation(from)) {
+            System.out.println("Error: Location '" + from + "' does not exist.");
+            return;
+        }
+        if (!campusMap.getGraph().hasLocation(to)) {
+            System.out.println("Error: Location '" + to + "' does not exist.");
+            return;
+        }
+        
+        int distance = getIntInput("Distance (in meters): ");
+        if (distance <= 0) {
+            System.out.println("Error: Distance must be positive.");
+            return;
+        }
+        
+        campusMap.addRoute(from, to, distance);
+        System.out.println("Route added: " + from + " <-> " + to + " (" + distance + "m)");
     }
 
     private static void findShortestPath() {

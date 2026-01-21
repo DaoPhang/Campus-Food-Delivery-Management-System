@@ -164,4 +164,83 @@ public class OrderSystem {
     public List<Order> getAllOrders() {
         return allOrders;
     }
+
+    /**
+     * Cancel an order by ID
+     * If the order is in the pending queue, remove it
+     * @return the cancelled order, or null if not found
+     */
+    public Order cancelOrder(String orderId) {
+        Order order = orderMap.get(orderId);
+        if (order == null) {
+            return null;
+        }
+
+        // If order is pending, remove from priority queue
+        if (order.getStatus().equals("Pending")) {
+            orderQueue.remove(order);
+        }
+
+        // Update status to Cancelled
+        order.setStatus("Cancelled");
+        return order;
+    }
+
+    /**
+     * Search orders by student name (case-insensitive partial match)
+     * @return list of matching orders
+     */
+    public List<Order> searchByStudentName(String name) {
+        List<Order> results = new ArrayList<>();
+        String searchName = name.toLowerCase();
+        for (Order order : allOrders) {
+            if (order.getStudentName().toLowerCase().contains(searchName)) {
+                results.add(order);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Search orders by status
+     * @return list of orders with matching status
+     */
+    public List<Order> searchByStatus(String status) {
+        List<Order> results = new ArrayList<>();
+        for (Order order : allOrders) {
+            if (order.getStatus().equalsIgnoreCase(status)) {
+                results.add(order);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Display orders filtered by status
+     */
+    public void displayOrdersByStatus(String status) {
+        System.out.println("\n=== Orders with Status: " + status + " ===");
+        List<Order> filtered = searchByStatus(status);
+        if (filtered.isEmpty()) {
+            System.out.println("No orders found with status: " + status);
+        } else {
+            for (Order order : filtered) {
+                System.out.println(order);
+            }
+        }
+        System.out.println("=====================================\n");
+    }
+
+    /**
+     * Get count of orders by status
+     */
+    public int getCountByStatus(String status) {
+        int count = 0;
+        for (Order order : allOrders) {
+            if (order.getStatus().equalsIgnoreCase(status)) {
+                count++;
+            }
+        }
+        return count;
+    }
 }
