@@ -17,9 +17,7 @@ public class Main {
     public static void main(String[] args) {
         scanner = new Scanner(System.in);
 
-        System.out.println("\n╔════════════════════════════════════════════════════════╗");
-        System.out.println("║    CAMPUS FOOD DELIVERY MANAGEMENT SYSTEM              ║");
-        System.out.println("╚════════════════════════════════════════════════════════╝\n");
+        ConsoleUI.printHeader("CAMPUS FOOD DELIVERY MANAGEMENT SYSTEM");
 
         // Initialize systems
         initializeSystems();
@@ -51,10 +49,10 @@ public class Main {
                     break;
                 case 0:
                     running = false;
-                    System.out.println("\nThank you for using Campus Food Delivery System!");
+                    ConsoleUI.printSuccess("Thank you for using Campus Food Delivery System!");
                     break;
                 default:
-                    System.out.println("Invalid choice. Please try again.");
+                    ConsoleUI.printError("Invalid choice. Please try again.");
             }
         }
 
@@ -62,7 +60,7 @@ public class Main {
     }
 
     private static void initializeSystems() {
-        System.out.println("Initializing systems...\n");
+        ConsoleUI.showLoading("Initializing Systems");
 
         // Initialize Graph and CampusMap
         Graph graph = new Graph();
@@ -75,7 +73,7 @@ public class Main {
         // Load data from files (UPGRADE 2)
         loadSystemData();
 
-        System.out.println("\nSystem initialized successfully!\n");
+        ConsoleUI.printSuccess("System initialized successfully!");
     }
 
     /**
@@ -109,7 +107,7 @@ public class Main {
     private static void orderMenu() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- Order Management ---");
+            ConsoleUI.printHeader("ORDER MANAGEMENT");
             System.out.println("1. Add New Order");
             System.out.println("2. View All Orders");
             System.out.println("3. View Pending Orders");
@@ -147,13 +145,13 @@ public class Main {
                     back = true;
                     break;
                 default:
-                    System.out.println("Invalid choice.");
+                    ConsoleUI.printError("Invalid choice.");
             }
         }
     }
 
     private static void addNewOrder() {
-        System.out.println("\n--- Add New Order ---");
+        ConsoleUI.printHeader("ADD NEW ORDER");
         System.out.print("Order ID: ");
         String orderId = scanner.nextLine().trim();
         System.out.print("Student Name: ");
@@ -166,7 +164,7 @@ public class Main {
 
         Order order = new Order(orderId, studentName, pickup, delivery, priority);
         orderSystem.addOrder(order);
-        System.out.println("Order added successfully!");
+        ConsoleUI.printSuccess("Order added successfully!");
     }
 
     private static void searchOrder() {
@@ -174,9 +172,9 @@ public class Main {
         String orderId = scanner.nextLine().trim();
         Order order = orderSystem.searchOrder(orderId);
         if (order != null) {
-            System.out.println("Found: " + order);
+            ConsoleUI.printSuccess("Found: " + order);
         } else {
-            System.out.println("Order not found.");
+            ConsoleUI.printError("Order not found.");
         }
     }
 
@@ -185,15 +183,40 @@ public class Main {
         String name = scanner.nextLine().trim();
         int[] count = new int[1];
         Order[] results = orderSystem.searchByStudentName(name, count);
-        System.out.println("\n=== Search Results for: " + name + " ===");
+        
+        ConsoleUI.printHeader("Search Results for: " + name);
+        
         if (count[0] == 0) {
-            System.out.println("No orders found for student: " + name);
+            ConsoleUI.printWarning("No orders found for student: " + name);
         } else {
+            // Define column widths {ID, Student Name, Priority, Status}
+            int[] widths = {10, 20, 10, 15};
+
+            // Print Header
+            ConsoleUI.printTableSeparator(widths);
+            ConsoleUI.printRow(widths, "ORDER ID", "STUDENT", "PRIORITY", "STATUS");
+            ConsoleUI.printTableSeparator(widths);
+
+            // Print Data
             for (int i = 0; i < count[0]; i++) {
-                System.out.println(results[i]);
+                Order o = results[i];
+                
+                // Color code the status
+                String statusStr = o.getStatus();
+                if (statusStr.equals("Pending")) statusStr = ConsoleUI.YELLOW + statusStr + ConsoleUI.RESET;
+                if (statusStr.equals("Delivered")) statusStr = ConsoleUI.GREEN + statusStr + ConsoleUI.RESET;
+                if (statusStr.equals("Delivering")) statusStr = ConsoleUI.BLUE + statusStr + ConsoleUI.RESET;
+                if (statusStr.equals("Cancelled")) statusStr = ConsoleUI.RED + statusStr + ConsoleUI.RESET;
+
+                ConsoleUI.printRow(widths, 
+                    o.getId(), 
+                    o.getStudentName(), 
+                    String.valueOf(o.getPriority()), 
+                    statusStr
+                );
             }
+            ConsoleUI.printTableSeparator(widths);
         }
-        System.out.println("=====================================\n");
     }
 
     private static void viewOrdersByStatus() {
@@ -211,7 +234,7 @@ public class Main {
             case 3: status = "Delivered"; break;
             case 4: status = "Cancelled"; break;
             default:
-                System.out.println("Invalid choice.");
+                ConsoleUI.printError("Invalid choice.");
                 return;
         }
         orderSystem.displayOrdersByStatus(status);
@@ -223,7 +246,7 @@ public class Main {
         
         Order order = orderSystem.searchOrder(orderId);
         if (order == null) {
-            System.out.println("Error: Order " + orderId + " not found.");
+            ConsoleUI.printError("Order " + orderId + " not found.");
             return;
         }
         
@@ -234,7 +257,7 @@ public class Main {
                 if (rider.getCurrentOrderId() != null && rider.getCurrentOrderId().equals(orderId)) {
                     rider.setStatus(Rider.RiderStatus.AVAILABLE);
                     rider.setCurrentOrderId(null);
-                    System.out.println("Rider " + rider.getName() + " has been freed.");
+                    ConsoleUI.printInfo("Rider " + rider.getName() + " has been freed.");
                     break;
                 }
             }
@@ -242,9 +265,10 @@ public class Main {
         
         Order cancelled = orderSystem.cancelOrder(orderId);
         if (cancelled != null) {
-            System.out.println("\n=== Order Cancelled ===");
+            ConsoleUI.printSuccess("Order Cancelled Successfully!");
+            ConsoleUI.printDivider();
             System.out.println(cancelled);
-            System.out.println("=======================\n");
+            ConsoleUI.printDivider();
         }
     }
 
@@ -254,7 +278,7 @@ public class Main {
     private static void riderMenu() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- Rider Management ---");
+            ConsoleUI.printHeader("RIDER MANAGEMENT");
             System.out.println("1. Add New Rider");
             System.out.println("2. View All Riders");
             System.out.println("3. View Available Riders");
@@ -280,13 +304,13 @@ public class Main {
                     back = true;
                     break;
                 default:
-                    System.out.println("Invalid choice.");
+                    ConsoleUI.printError("Invalid choice.");
             }
         }
     }
 
     private static void addNewRider() {
-        System.out.println("\n--- Add New Rider ---");
+        ConsoleUI.printHeader("ADD NEW RIDER");
         System.out.print("Rider ID: ");
         String riderId = scanner.nextLine().trim();
         System.out.print("Name: ");
@@ -296,7 +320,7 @@ public class Main {
 
         Rider rider = new Rider(riderId, name, location);
         dispatchSystem.addRider(rider);
-        System.out.println("Rider added successfully!");
+        ConsoleUI.printSuccess("Rider added successfully!");
     }
 
     private static void searchRider() {
@@ -304,9 +328,9 @@ public class Main {
         String riderId = scanner.nextLine().trim();
         Rider rider = dispatchSystem.getRider(riderId);
         if (rider != null) {
-            System.out.println("Found: " + rider.toDetailedString());
+            ConsoleUI.printSuccess("Found: " + rider.toDetailedString());
         } else {
-            System.out.println("Rider not found.");
+            ConsoleUI.printError("Rider not found.");
         }
     }
 
@@ -316,11 +340,8 @@ public class Main {
     private static void dispatchMenu() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- Dispatch Operations ---");
-            System.out.println("╔═══════════════════════════════════════════╗");
-            System.out.println("║     Weighted Optimization Active          ║");
-            System.out.println("║     Undo/Redo System Available            ║");
-            System.out.println("╚═══════════════════════════════════════════╝");
+            ConsoleUI.printHeader("DISPATCH OPERATIONS");
+            ConsoleUI.printInfo("Weighted Optimization Active | Undo/Redo System Available");
             System.out.println("1. Assign Next Order (Weighted Dispatch)");
             System.out.println("2. Complete Order");
             System.out.println("3. Undo Last Dispatch");
@@ -332,19 +353,19 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    System.out.println(
-                            "\n[UPGRADE 1] Using weighted scoring: score = (1.0×distance) + (2.0×jobs) - (0.5×idleTime/1000)");
+                    ConsoleUI.printInfo("Using Weighted Scoring Algorithm (Distance + Workload + IdleTime)");
+                    ConsoleUI.showLoading("Optimizing Rider Selection");
                     dispatchSystem.assignOrder(orderSystem, campusMap);
                     break;
                 case 2:
                     completeOrder();
                     break;
                 case 3:
-                    System.out.println("\n[UPGRADE 3] Undoing last dispatch...");
+                    ConsoleUI.showLoading("Undoing last dispatch");
                     dispatchSystem.undoLastDispatch(orderSystem);
                     break;
                 case 4:
-                    System.out.println("\n[UPGRADE 3] Redoing last undo...");
+                    ConsoleUI.showLoading("Redoing last undo");
                     dispatchSystem.redoLastDispatch(orderSystem, campusMap);
                     break;
                 case 5:
@@ -354,7 +375,7 @@ public class Main {
                     back = true;
                     break;
                 default:
-                    System.out.println("Invalid choice.");
+                    ConsoleUI.printError("Invalid choice.");
             }
         }
     }
@@ -372,10 +393,8 @@ public class Main {
     private static void mapMenu() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- Campus Map ---");
-            System.out.println("╔═══════════════════════════════════════════╗");
-            System.out.println("║       Graph-based Location System         ║");
-            System.out.println("╚═══════════════════════════════════════════╝");
+            ConsoleUI.printHeader("CAMPUS MAP");
+            ConsoleUI.printInfo("Graph-based Location System with Dijkstra's Algorithm");
             System.out.println("1. Add New Location");
             System.out.println("2. Add Route Between Locations");
             System.out.println("3. Display Full Map (Adjacency List)");
@@ -408,24 +427,24 @@ public class Main {
                     break;
                 case 7:
                     campusMap.getGraph().clearCache();
-                    System.out.println("Path cache cleared.");
+                    ConsoleUI.printSuccess("Path cache cleared.");
                     break;
                 case 0:
                     back = true;
                     break;
                 default:
-                    System.out.println("Invalid choice.");
+                    ConsoleUI.printError("Invalid choice.");
             }
         }
     }
 
     private static void addLocation() {
-        System.out.println("\n--- Add New Location ---");
+        ConsoleUI.printHeader("ADD NEW LOCATION");
         System.out.print("Location Name: ");
         String name = scanner.nextLine().trim();
         
         if (campusMap.getGraph().hasLocation(name)) {
-            System.out.println("Error: Location '" + name + "' already exists.");
+            ConsoleUI.printError("Location '" + name + "' already exists.");
             return;
         }
         
@@ -435,11 +454,11 @@ public class Main {
         String block = scanner.nextLine().trim();
         
         campusMap.addLocation(name, facultyOrDorm, block);
-        System.out.println("Location '" + name + "' added successfully!");
+        ConsoleUI.printSuccess("Location '" + name + "' added successfully!");
     }
 
     private static void addRoute() {
-        System.out.println("\n--- Add Route Between Locations ---");
+        ConsoleUI.printHeader("ADD ROUTE");
         System.out.print("From Location: ");
         String from = scanner.nextLine().trim();
         System.out.print("To Location: ");
@@ -447,22 +466,22 @@ public class Main {
         
         // Validate locations exist
         if (!campusMap.getGraph().hasLocation(from)) {
-            System.out.println("Error: Location '" + from + "' does not exist.");
+            ConsoleUI.printError("Location '" + from + "' does not exist.");
             return;
         }
         if (!campusMap.getGraph().hasLocation(to)) {
-            System.out.println("Error: Location '" + to + "' does not exist.");
+            ConsoleUI.printError("Location '" + to + "' does not exist.");
             return;
         }
         
         int distance = getIntInput("Distance (in meters): ");
         if (distance <= 0) {
-            System.out.println("Error: Distance must be positive.");
+            ConsoleUI.printError("Distance must be positive.");
             return;
         }
         
         campusMap.addRoute(from, to, distance);
-        System.out.println("Route added: " + from + " <-> " + to + " (" + distance + "m)");
+        ConsoleUI.printSuccess("Route added: " + from + " <-> " + to + " (" + distance + "m)");
     }
 
     private static void findShortestPath() {
@@ -471,21 +490,22 @@ public class Main {
         System.out.print("To: ");
         String to = scanner.nextLine().trim();
 
-        System.out.println("\n[UPGRADE 4] Checking cache...");
+        ConsoleUI.showLoading("Calculating Optimal Route");
         int[] length = new int[1];
         String[] path = campusMap.getShortestPath(from, to, length);
 
         if (length[0] == 0) {
-            System.out.println("No path found between " + from + " and " + to);
+            ConsoleUI.printError("No path found between " + from + " and " + to);
         } else {
-            System.out.print("Shortest Path: ");
+            ConsoleUI.printSuccess("Path Found!");
+            System.out.print(ConsoleUI.GREEN + "Shortest Path: " + ConsoleUI.RESET);
             for (int i = 0; i < length[0]; i++) {
-                System.out.print(path[i]);
+                System.out.print(ConsoleUI.CYAN + path[i] + ConsoleUI.RESET);
                 if (i < length[0] - 1)
                     System.out.print(" → ");
             }
             System.out.println();
-            System.out.println("Distance: " + campusMap.getDistance(from, to) + " km");
+            System.out.println(ConsoleUI.YELLOW + "Distance: " + campusMap.getDistance(from, to) + " meters" + ConsoleUI.RESET);
         }
     }
 
@@ -497,9 +517,9 @@ public class Main {
 
         double distance = campusMap.getDistance(from, to);
         if (distance >= 0) {
-            System.out.println("Distance: " + distance + " km");
+            ConsoleUI.printSuccess("Distance: " + distance + " meters");
         } else {
-            System.out.println("No path found.");
+            ConsoleUI.printError("No path found.");
         }
     }
 
@@ -516,10 +536,8 @@ public class Main {
     private static void persistenceMenu() {
         boolean back = false;
         while (!back) {
-            System.out.println("\n--- File Persistence ---");
-            System.out.println("╔═══════════════════════════════════════════╗");
-            System.out.println("║             File Save/Load System         ║");
-            System.out.println("╚═══════════════════════════════════════════╝");
+            ConsoleUI.printHeader("FILE PERSISTENCE");
+            ConsoleUI.printInfo("Save/Load System Data to Files");
             System.out.println("1. Save All Data");
             System.out.println("2. Load All Data");
             System.out.println("3. Save Riders Only");
@@ -537,34 +555,37 @@ public class Main {
                     break;
                 case 3:
                     dispatchSystem.saveRiders("data/riders_backup.txt");
+                    ConsoleUI.printSuccess("Riders saved!");
                     break;
                 case 4:
                     orderSystem.saveOrders("data/orders_backup.txt");
+                    ConsoleUI.printSuccess("Orders saved!");
                     break;
                 case 0:
                     back = true;
                     break;
                 default:
-                    System.out.println("Invalid choice.");
+                    ConsoleUI.printError("Invalid choice.");
             }
         }
     }
 
     private static void saveAllData() {
-        System.out.println("\n[UPGRADE 2] Saving all data...");
+        ConsoleUI.showLoading("Saving all data");
         dispatchSystem.saveRiders("data/riders_backup.txt");
         orderSystem.saveOrders("data/orders_backup.txt");
-        System.out.println("All data saved successfully!");
+        ConsoleUI.printSuccess("All data saved successfully!");
     }
 
     private static void loadAllData() {
-        System.out.println("\n[UPGRADE 2] Reloading data from files...");
+        ConsoleUI.showLoading("Reloading data from files");
         loadSystemData();
-        System.out.println("Data reloaded successfully!");
+        ConsoleUI.printSuccess("Data reloaded successfully!");
     }
 
     private static void displayStatistics() {
-        System.out.println("\n[UPGRADE 5] Displaying comprehensive system statistics...");
+        ConsoleUI.printHeader("SYSTEM STATISTICS");
+        ConsoleUI.showLoading("Gathering performance metrics");
         SystemStatistics.getInstance().displayStatistics(
                 campusMap.getGraph(),
                 dispatchSystem,
