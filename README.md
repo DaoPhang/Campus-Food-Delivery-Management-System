@@ -25,6 +25,7 @@ The **Campus Food Delivery Management System** is a hybrid (Console + Web) appli
 src/
 ├── Main.java                // Entry point (Launches Console + Web Server)
 ├── WebServer.java           // Custom HTTP Server for Dashboard (No frameworks)
+├── ConsoleUI.java           // Utility class for rich text formatting & menus
 ├── CustomHashMap.java       // Manual Hash Table implementation (O(1) lookup)
 ├── CampusMap.java           // High-level interface for the Map
 ├── Graph.java               // Core graph algorithms (Dijkstra, Adjacency List)
@@ -93,7 +94,8 @@ This project implements **6 specific upgrades** to the base requirements:
 1.  Run the application via `Main.java`.
 2.  The **Console Menu** will appear for standard inputs.
 3.  The **Web Server** automatically starts at `http://localhost:8080`.
-    * Open browser to see the live graph visualization.
+    * **Visualization:** Open `http://localhost:8080/dashboard.html` to see the live graph.
+    * **Admin Panel:** Open `http://localhost:8080/admin.html` to add orders/riders via Web UI.
 
 ### 2. Operations
 * **Assign Next Order**: The system automatically picks the highest priority order and assigns it to the best available rider using the Weighted Algorithm.
