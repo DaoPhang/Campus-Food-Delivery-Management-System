@@ -6,6 +6,9 @@
 3. **Yang Pu** (24088528)
 4. **Teow Yan Ping** (24063218)
 
+## 📺 Project Demo
+[Click here to watch our 5-minute Project Walkthrough](#) *(Insert YouTube/Drive Link Here)*
+
 ## 📖 Project Overview
 The **Campus Food Delivery Management System** is a Java-based console application designed to simulate and manage the logistics of food delivery within a university campus. The system handles order placement, rider dispatching, route optimization, and system monitoring.
 
@@ -78,18 +81,18 @@ docs/
 *   **Role**: A wrapper class acting as a facade for `Graph.java`.
 *   **Functionality**: Simplifies method calls for the `Main` class (e.g., `getDistance`, `getShortestPath`) and delegates complex logic to the `Graph`.
 
-### 7. ConsoleUI.java
+### 6. ConsoleUI.java
 *   **Role**: Handles all rich console output and user interface elements.
 *   **Functionality**:
     *   **Visual Enhancements**: Provides ANSI color codes (Red for errors, Green for success, etc.) and formatted tables.
     *   **Animations**: Includes a "loading" animation to simulate processing time for algorithms.
     *   **Standardized Output**: Helper methods for headers, dividers, and consistent message formatting.
 
-### 8. SystemStatistics.java (Upgrade 5)
+### 7. SystemStatistics.java (Upgrade 5)
 *   **Role**: A Singleton class for tracking global system performance.
 *   **Functionality**: Aggregates data from all systems to display a comprehensive report (Total Orders, Average Delivery Time, Cache Hit Rates, etc.).
 
-### 9. Entity Classes
+### 8. Entity Classes
 *   **Rider.java**: Stores rider details (ID, Name, Location, Status, Jobs Completed).
 *   **Order.java**: Stores order details (ID, Student Name, Pickup/Delivery Locations, Status).
 *   **Location.java**: Represents a node on the map (Name, Faculty, Block).
@@ -149,6 +152,15 @@ This project implements 5 specific upgrades to the base system:
 5.  **Performance Statistics**:
     *   Real-time tracking of metrics like "Average Distance per Order", "Cache Hit Rate", and "Rider Utilization".
 
+## ✅ Requirements Compliance Checklist
+| Requirement | Implementation Detail | Location |
+| :--- | :--- | :--- |
+| **Graph (Adjacency List)** | Custom `Edge[][]` array structure | `Graph.java` |
+| **Priority Queue** | Manual sorted insertion logic | `OrderSystem.java` |
+| **Lookup (Dictionary)** | **Manual Linear Search** (Array-based) to demonstrate low-level traversal logic instead of built-in HashMaps. | `OrderSystem.java` |
+| **Shortest Path** | Dijkstra's Algorithm (Manual Implementation) | `Graph.java` |
+| **Stack/Queue** | Manual Array-based Stack (Undo/Redo) and Queue (Orders) | `DispatchSystem.java` |
+
 ---
 
 ## 📖 User Guide
@@ -185,6 +197,10 @@ This project implements 5 specific upgrades to the base system:
 ---
 
 ## ⚙️ Installation
+
+### Prerequisites
+* **Java Development Kit (JDK)**: Version 8 or higher.
+* **OS**: Windows, macOS, or Linux (Console supports ANSI colors on all platforms).
 
 1.  **Compile**:
     ```bash
