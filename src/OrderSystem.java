@@ -16,6 +16,9 @@ public class OrderSystem {
     private Order[] allOrders;
     private int orderCount;
 
+    // UPGRADE: CustomHashMap for O(1) Fast Lookup (Requirement #3)
+    private CustomHashMap<String, Order> orderMap;
+
     public OrderSystem() {
         this.orderQueue = new Order[MAX_ORDERS];
         this.front = 0;
@@ -23,18 +26,17 @@ public class OrderSystem {
 
         this.allOrders = new Order[MAX_ORDERS];
         this.orderCount = 0;
+
+        // Initialize the Custom Map
+        this.orderMap = new CustomHashMap<>();
     }
 
     /**
-     * Search for order by ID - linear search
+     * Search for order by ID - Uses CustomHashMap for O(1) access
      */
     public Order searchOrder(String orderID) {
-        for (int i = 0; i < orderCount; i++) {
-            if (allOrders[i].getId().equals(orderID)) {
-                return allOrders[i];
-            }
-        }
-        return null;
+        // Requirement 3: Fast lookup using Custom Hash Map
+        return orderMap.get(orderID);
     }
 
     /**
@@ -58,8 +60,11 @@ public class OrderSystem {
             return;
         }
 
-        // Add to all orders array
+        // Add to all orders array (For listing)
         allOrders[orderCount++] = order;
+
+        // Add to HashMap (For fast lookup)
+        orderMap.put(order.getId(), order);
 
         // If pending, add to queue
         if (order.getStatus().equals("Pending")) {

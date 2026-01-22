@@ -9,6 +9,9 @@ public class DispatchSystem {
     private int riderCount;
     private static final int MAX_RIDERS = 100;
 
+    // UPGRADE: CustomHashMap for O(1) Fast Lookup (Requirement #3)
+    private CustomHashMap<String, Rider> riderMap;
+
     // Manual array-based undo/redo stacks
     private DispatchAction[] undoStack;
     private int undoTop;
@@ -26,6 +29,9 @@ public class DispatchSystem {
         this.riderList = new Rider[MAX_RIDERS];
         this.riderCount = 0;
         
+        // Initialize Custom Map
+        this.riderMap = new CustomHashMap<>();
+        
         // Initialize undo/redo stacks
         this.undoStack = new DispatchAction[MAX_STACK_SIZE];
         this.undoTop = 0;
@@ -39,16 +45,18 @@ public class DispatchSystem {
     public void addRider(Rider rider) {
         if (riderCount < MAX_RIDERS) {
             riderList[riderCount++] = rider;
+            
+            // Add to HashMap for fast lookup
+            riderMap.put(rider.getId(), rider);
         }
     }
 
+    /**
+     * Get rider by ID - Uses CustomHashMap for O(1) access
+     */
     public Rider getRider(String id) {
-        for (int i = 0; i < riderCount; i++) {
-            if (riderList[i].getId().equals(id)) {
-                return riderList[i];
-            }
-        }
-        return null;
+        // Requirement 3: Fast lookup using Custom Hash Map
+        return riderMap.get(id);
     }
 
     public void displayAvailableRiders() {
