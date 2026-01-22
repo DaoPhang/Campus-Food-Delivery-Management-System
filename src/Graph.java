@@ -3,9 +3,6 @@ import java.io.*;
 /**
  * Graph class implementing campus map with Dijkstra's shortest path algorithm
  * Uses manual array-based implementations instead of Java Collections
- * UPGRADE 4: Path caching optimization
- * UPGRADE 2: File persistence for locations and routes
- * UPGRADE 5: Statistics tracking for Dijkstra calls
  */
 public class Graph {
     // Constants

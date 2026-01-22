@@ -2,10 +2,6 @@ import java.io.*;
 
 /**
  * DispatchSystem manages rider dispatch operations
- * UPGRADE 1: Weighted optimization for rider selection
- * UPGRADE 2: File persistence for riders
- * UPGRADE 3: Undo/Redo system using stacks
- * UPGRADE 5: Performance statistics tracking
  */
 public class DispatchSystem {
     // Manual array-based rider list
@@ -19,12 +15,8 @@ public class DispatchSystem {
     private DispatchAction[] redoStack;
     private int redoTop;
     private static final int MAX_STACK_SIZE = 50;
-
-    // UPGRADE 5: Performance statistics
     private int totalOrdersDispatched;
     private double totalDistanceAssigned;
-
-    // UPGRADE 1: Weighted dispatch constants
     private static final double ALPHA = 1.0; // Distance importance
     private static final double BETA = 2.0; // Workload balancing
     private static final double GAMMA = 0.5; // Fairness (idle riders preferred)

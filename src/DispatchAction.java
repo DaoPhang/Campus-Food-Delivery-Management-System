@@ -1,6 +1,5 @@
 /**
  * DispatchAction stores the state of a dispatch operation for undo/redo
- * UPGRADE 3: Undo/Redo System
  */
 public class DispatchAction {
     private final String orderId;
