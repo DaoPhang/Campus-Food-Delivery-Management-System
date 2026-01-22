@@ -34,6 +34,9 @@ data/
 ├── routes.txt               // Map edges (distances)
 ├── riders.txt               // Rider data
 └── orders.txt               // Order data
+docs/
+├── MEMBER3_COORDINATION_NOTES.md // Internal team notes
+└── WIA1002 Campus Food Delivery Management System.pdf // Project requirements/specs
 ```
 
 ---
@@ -75,17 +78,49 @@ data/
 *   **Role**: A wrapper class acting as a facade for `Graph.java`.
 *   **Functionality**: Simplifies method calls for the `Main` class (e.g., `getDistance`, `getShortestPath`) and delegates complex logic to the `Graph`.
 
-### 6. SystemStatistics.java (Upgrade 5)
+### 7. ConsoleUI.java
+*   **Role**: Handles all rich console output and user interface elements.
+*   **Functionality**:
+    *   **Visual Enhancements**: Provides ANSI color codes (Red for errors, Green for success, etc.) and formatted tables.
+    *   **Animations**: Includes a "loading" animation to simulate processing time for algorithms.
+    *   **Standardized Output**: Helper methods for headers, dividers, and consistent message formatting.
+
+### 8. SystemStatistics.java (Upgrade 5)
 *   **Role**: A Singleton class for tracking global system performance.
 *   **Functionality**: Aggregates data from all systems to display a comprehensive report (Total Orders, Average Delivery Time, Cache Hit Rates, etc.).
 
-### 7. Entity Classes
+### 9. Entity Classes
 *   **Rider.java**: Stores rider details (ID, Name, Location, Status, Jobs Completed).
 *   **Order.java**: Stores order details (ID, Student Name, Pickup/Delivery Locations, Status).
 *   **Location.java**: Represents a node on the map (Name, Faculty, Block).
 *   **Edge.java**: Represents a connection between two locations with a weight (distance).
 *   **DispatchAction.java**: A "snapshot" object storing the details of a dispatch event, used specifically for the Undo/Redo stacks.
 *   **PathResult.java**: A helper object to store the result of a pathfinding operation (nodes and total distance) for the cache.
+
+---
+
+## 📂 Data Configuration
+The system is pre-loaded with data from the `data/` directory. You can edit these files to customize the simulation.
+
+### 1. `locations.txt`
+Defines the nodes in the campus graph.
+*   **Format**: `Name,Category,Block`
+*   **Example**: `FCSIT,Faculty,Block A`
+
+### 2. `routes.txt`
+Defines the edges (connections) between locations.
+*   **Format**: `Location1,Location2,Distance(meters)`
+*   **Example**: `Main Gate KL,DTC,400`
+
+### 3. `riders.txt`
+Defines the initial fleet of riders.
+*   **Format**: `RiderID,Name,StartingLocation`
+*   **Example**: `R001,Ali,Main Gate KL`
+
+### 4. `orders.txt`
+Defines pre-existing orders for testing.
+*   **Format**: `OrderID,StudentName,Pickup,Dropoff,Priority,Status`
+*   **Example**: `O001,Aisyah,Main Library,KK12,1,Pending`
 
 ---
 
