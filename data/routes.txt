@@ -1,11 +1,22 @@
 Main Gate KL,DTC,400
 DTC,Main Library,300
+Main Library,He & She Coffee,50
 Main Library,FCSIT,500
+FCSIT,The Cube,20
 FCSIT,KK12,600
+KK12,Kafe KK12,30
 FCSIT,Faculty of Science,400
 Faculty of Science,Main Library,350
 Main Library,Faculty of Engineering,700
-KK12,UM Arena,800
+Faculty of Engineering,Faculty of Law,500
+Faculty of Law,KK3,450
+KK3,KK4,200
+KK4,KK5,250
+KK5,Kafe KK5,30
+KK5,KK6,300
+KK6,KK7,350
+KK7,KK8,300
+KK8,KK9,400
 Main Gate KL,KK9,1200
 KK9,Faculty of Science,900
 Pantai Gate,UM Arena,500
@@ -13,3 +24,15 @@ UM Arena,Exam Hall,600
 Exam Hall,DTC,200
 Faculty of Engineering,Varsity Lake,400
 Varsity Lake,Main Library,450
+KK1,KK2,300
+KK2,Faculty of Arts,400
+Faculty of Arts,Food Court A,50
+Faculty of Arts,Main Library,600
+KK10,KK11,250
+KK11,Rumah Universiti,500
+Rumah Universiti,DTC,400
+KK13,UM Arena,700
+PJ Gate,KK12,800
+KK10,Faculty of Engineering,600
+Faculty of Economics,Faculty of Law,350
+Faculty of Economics,KK3,500

@@ -83,8 +83,8 @@ public class SystemStatistics {
         System.out.println("║  📦 ORDER STATISTICS                    ║");
         System.out.printf("║    Total Orders Processed: %-13d║%n", totalOrdersProcessed);
         System.out.printf("║    Pending Orders: %-20d║%n", orders.getPendingCount());
-        System.out.printf("║    Total Distance: %-16.1f km ║%n", totalDistanceTraveled);
-        System.out.printf("║    Avg Distance/Order: %-13.1f km ║%n", getAverageDistance());
+        System.out.printf("║    Total Distance: %-17.1f m ║%n", totalDistanceTraveled);
+        System.out.printf("║    Avg Distance/Order: %-14.1f m ║%n", getAverageDistance());
 
         System.out.println("╠════════════════════════════════════════╣");
 

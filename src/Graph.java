@@ -485,6 +485,24 @@ public class Graph {
     }
 
     /**
+     * Get edges for a specific location (Required for Web Visualization)
+     */
+    public Edge[] getEdges(String locationName) {
+        int index = getNodeIndex(locationName);
+        if (index == -1) {
+            return new Edge[0];
+        }
+        
+        // Create a copy of the edges to return
+        int count = edgeCount[index];
+        Edge[] result = new Edge[count];
+        for (int i = 0; i < count; i++) {
+            result[i] = adjList[index][i];
+        }
+        return result;
+    }
+
+    /**
      * Get node count
      */
     public int getNodeCount() {

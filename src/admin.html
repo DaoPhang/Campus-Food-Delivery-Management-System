@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Food Delivery - Management System</title>
+    <style>
+        :root {
+            --bg-dark: #050510;
+            --panel-glass: rgba(20, 30, 60, 0.6);
+            --accent-cyan: #00f3ff;
+            --accent-pink: #ff0099;
+            --accent-green: #00ff66;
+            --accent-yellow: #ffee00;
+            --accent-red: #ff3333;
+            --text-primary: #e0faff;
+            --text-dim: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--panel-glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 2px solid rgba(0, 243, 255, 0.3);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .panel {
+            background: var(--panel-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel h2 {
+            margin: 0 0 20px 0;
+            font-size: 1.3rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid rgba(0, 243, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: rgba(0, 243, 255, 0.2);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 6px;
+            color: var(--accent-cyan);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: rgba(0, 255, 102, 0.2);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .btn-success:hover {
+            background: rgba(0, 255, 102, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.5);
+        }
+
+        .btn-warning {
+            background: rgba(255, 238, 0, 0.2);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        .btn-warning:hover {
+            background: rgba(255, 238, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 238, 0, 0.5);
+        }
+
+        .btn-danger {
+            background: rgba(255, 51, 51, 0.2);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 51, 51, 0.3);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(0, 243, 255, 0.1);
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: rgba(255, 238, 0, 0.2);
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .status-delivering {
+            background: rgba(0, 243, 255, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .status-delivered {
+            background: rgba(0, 255, 102, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .status-cancelled {
+            background: rgba(255, 51, 51, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .status-available {
+            background: rgba(0, 255, 102, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: rgba(0, 255, 102, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .alert-error {
+            background: rgba(255, 51, 51, 0.1);
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .alert-info {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            margin: 10px 0;
+        }
+
+        .stat-card .label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+        }
+
+        .path-result {
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .path-result .path {
+            color: var(--accent-cyan);
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .path-result .distance {
+            color: var(--accent-yellow);
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🚚 Campus Food Delivery Management</h1>
+        <div class="nav-tabs">
+            <a href="#" class="nav-tab active" data-tab="orders">Orders</a>
+            <a href="#" class="nav-tab" data-tab="riders">Riders</a>
+            <a href="#" class="nav-tab" data-tab="dispatch">Dispatch</a>
+            <a href="#" class="nav-tab" data-tab="map">Map</a>
+            <a href="#" class="nav-tab" data-tab="data">Data</a>
+            <a href="#" class="nav-tab" data-tab="stats">Statistics</a>
+            <a href="/dashboard.html" class="nav-tab" style="background: rgba(255, 0, 153, 0.2); border-color: var(--accent-pink); color: var(--accent-pink);">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Orders Tab -->
+        <div id="orders" class="tab-content active">
+            <div class="panel">
+                <h2>Add New Order</h2>
+                <form id="addOrderForm" class="form-grid">
+                    <div class="form-group">
+                        <label>Order ID</label>
+                        <input type="text" id="orderId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Student Name</label>
+                        <input type="text" id="studentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pickup Location</label>
+                        <input type="text" id="pickupLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Delivery Location</label>
+                        <input type="text" id="deliveryLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority (1=highest)</label>
+                        <input type="number" id="priority" min="1" value="1" required>
+                    </div>
+                </form>
+                <button class="btn btn-success" onclick="addOrder()">Add Order</button>
+            </div>
+
+            <div class="panel">
+                <h2>Search Orders</h2>
+                <div class="search-box">
+                    <input type="text" id="searchOrderInput" placeholder="Search by Order ID or Student Name..." onkeyup="searchOrders()">
+                </div>
+                <div>
+                    <button class="btn" onclick="viewAllOrders()">View All</button>
+                    <button class="btn" onclick="viewPendingOrders()">Pending Only</button>
+                    <button class="btn" onclick="filterByStatus('Pending')">Pending</button>
+                    <button class="btn" onclick="filterByStatus('Delivering')">Delivering</button>
+                    <button class="btn" onclick="filterByStatus('Delivered')">Delivered</button>
+                    <button class="btn" onclick="filterByStatus('Cancelled')">Cancelled</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Orders List</h2>
+                <div id="ordersList" class="table-container">
+                    <div class="empty-state">Loading orders...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Riders Tab -->
+        <div id="riders" class="tab-content">
+            <div class="panel">
+                <h2>Add New Rider</h2>
+                <form id="addRiderForm" class="form-grid">
+                    <div class="form-group">
+                        <label>Rider ID</label>
+                        <input type="text" id="riderId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="riderName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Starting Location</label>
+                        <input type="text" id="riderLocation" required>
+                    </div>
+                </form>
+                <button class="btn btn-success" onclick="addRider()">Add Rider</button>
+            </div>
+
+            <div class="panel">
+                <h2>Search Riders</h2>
+                <div class="search-box">
+                    <input type="text" id="searchRiderInput" placeholder="Search by Rider ID..." onkeyup="searchRiders()">
+                </div>
+                <div>
+                    <button class="btn" onclick="viewAllRiders()">View All</button>
+                    <button class="btn" onclick="viewAvailableRiders()">Available Only</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Riders List</h2>
+                <div id="ridersList" class="table-container">
+                    <div class="empty-state">Loading riders...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dispatch Tab -->
+        <div id="dispatch" class="tab-content">
+            <div class="panel">
+                <h2>Dispatch Operations</h2>
+                <div>
+                    <button class="btn btn-success" onclick="assignOrder()">Assign Next Order (Weighted Dispatch)</button>
+                    <button class="btn btn-warning" onclick="undoDispatch()">Undo Last Dispatch</button>
+                    <button class="btn btn-warning" onclick="redoDispatch()">Redo Last Undo</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Complete Order</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Order ID</label>
+                        <input type="text" id="completeOrderId" placeholder="Enter Order ID to complete">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="completeOrder()">Complete Order</button>
+            </div>
+
+            <div class="panel">
+                <h2>Dispatch Status</h2>
+                <div id="dispatchStatus"></div>
+            </div>
+        </div>
+
+        <!-- Map Tab -->
+        <div id="map" class="tab-content">
+            <div class="panel">
+                <h2>Add New Location</h2>
+                <form id="addLocationForm" class="form-grid">
+                    <div class="form-group">
+                        <label>Location Name</label>
+                        <input type="text" id="locationName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Faculty/Dorm</label>
+                        <input type="text" id="locationFaculty" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Block/Zone</label>
+                        <input type="text" id="locationBlock" required>
+                    </div>
+                </form>
+                <button class="btn btn-success" onclick="addLocation()">Add Location</button>
+            </div>
+
+            <div class="panel">
+                <h2>Add Route</h2>
+                <form id="addRouteForm" class="form-grid">
+                    <div class="form-group">
+                        <label>From Location</label>
+                        <input type="text" id="routeFrom" required>
+                    </div>
+                    <div class="form-group">
+                        <label>To Location</label>
+                        <input type="text" id="routeTo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Distance (meters)</label>
+                        <input type="number" id="routeDistance" min="1" required>
+                    </div>
+                </form>
+                <button class="btn btn-success" onclick="addRoute()">Add Route</button>
+            </div>
+
+            <div class="panel">
+                <h2>Find Shortest Path</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>From</label>
+                        <input type="text" id="pathFrom" required>
+                    </div>
+                    <div class="form-group">
+                        <label>To</label>
+                        <input type="text" id="pathTo" required>
+                    </div>
+                </div>
+                <button class="btn" onclick="findShortestPath()">Find Path</button>
+                <div id="pathResult"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Cache Statistics</h2>
+                <div id="cacheStats"></div>
+                <button class="btn btn-warning" onclick="clearCache()">Clear Cache</button>
+            </div>
+        </div>
+
+        <!-- Data Tab -->
+        <div id="data" class="tab-content">
+            <div class="panel">
+                <h2>File Persistence</h2>
+                <div>
+                    <button class="btn btn-success" onclick="saveAllData()">Save All Data</button>
+                    <button class="btn" onclick="loadAllData()">Load All Data</button>
+                    <button class="btn" onclick="saveRiders()">Save Riders Only</button>
+                    <button class="btn" onclick="saveOrders()">Save Orders Only</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="stats" class="tab-content">
+            <div class="panel">
+                <h2>System Statistics</h2>
+                <div id="statisticsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertContainer" style="position: fixed; top: 80px; right: 20px; z-index: 1000; max-width: 400px;"></div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (tab.getAttribute('href') === '/dashboard.html') return;
+                
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+                
+                // Load data when switching tabs
+                loadTabData(tab.dataset.tab);
+            });
+        });
+
+        function loadTabData(tab) {
+            switch(tab) {
+                case 'orders':
+                    viewAllOrders();
+                    break;
+                case 'riders':
+                    viewAllRiders();
+                    break;
+                case 'dispatch':
+                    loadDispatchStatus();
+                    break;
+                case 'map':
+                    loadCacheStats();
+                    break;
+                case 'stats':
+                    loadStatistics();
+                    break;
+            }
+        }
+
+        function showAlert(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            document.getElementById('alertContainer').appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        // Orders Functions
+        async function addOrder() {
+            const data = {
+                id: document.getElementById('orderId').value,
+                studentName: document.getElementById('studentName').value,
+                pickup: document.getElementById('pickupLocation').value,
+                delivery: document.getElementById('deliveryLocation').value,
+                priority: parseInt(document.getElementById('priority').value)
+            };
+
+            try {
+                const res = await fetch('/api/orders/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Order added successfully!', 'success');
+                    document.getElementById('addOrderForm').reset();
+                    viewAllOrders();
+                } else {
+                    showAlert(result.error || 'Failed to add order', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function viewAllOrders() {
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+                displayOrders(data.orders || []);
+            } catch (e) {
+                showAlert('Error loading orders: ' + e.message, 'error');
+            }
+        }
+
+        async function viewPendingOrders() {
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+                const pending = (data.orders || []).filter(o => o.status === 'Pending');
+                displayOrders(pending);
+            } catch (e) {
+                showAlert('Error loading orders: ' + e.message, 'error');
+            }
+        }
+
+        function filterByStatus(status) {
+            try {
+                fetch('/api/state')
+                    .then(r => r.json())
+                    .then(data => {
+                        const filtered = (data.orders || []).filter(o => o.status === status);
+                        displayOrders(filtered);
+                    });
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function searchOrders() {
+            const query = document.getElementById('searchOrderInput').value.toLowerCase();
+            if (!query) {
+                viewAllOrders();
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/orders/search?q=' + encodeURIComponent(query));
+                const results = await res.json();
+                displayOrders(results.orders || []);
+            } catch (e) {
+                showAlert('Error searching: ' + e.message, 'error');
+            }
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersList');
+            if (!orders || orders.length === 0) {
+                container.innerHTML = '<div class="empty-state">No orders found</div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Order ID</th><th>Student</th><th>Pickup</th><th>Delivery</th><th>Priority</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+            orders.forEach(order => {
+                const statusClass = order.status.toLowerCase();
+                html += `<tr>
+                    <td>${order.id}</td>
+                    <td>${order.studentName}</td>
+                    <td>${order.pickup}</td>
+                    <td>${order.delivery}</td>
+                    <td>${order.priority}</td>
+                    <td><span class="status-badge status-${statusClass}">${order.status}</span></td>
+                    <td><button class="btn btn-danger" onclick="cancelOrder('${order.id}')">Cancel</button></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        async function cancelOrder(orderId) {
+            if (!confirm(`Cancel order ${orderId}?`)) return;
+
+            try {
+                const res = await fetch('/api/orders/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Order cancelled successfully!', 'success');
+                    viewAllOrders();
+                } else {
+                    showAlert(result.error || 'Failed to cancel order', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        // Riders Functions
+        async function addRider() {
+            const data = {
+                id: document.getElementById('riderId').value,
+                name: document.getElementById('riderName').value,
+                location: document.getElementById('riderLocation').value
+            };
+
+            try {
+                const res = await fetch('/api/riders/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Rider added successfully!', 'success');
+                    document.getElementById('addRiderForm').reset();
+                    viewAllRiders();
+                } else {
+                    showAlert(result.error || 'Failed to add rider', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function viewAllRiders() {
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+                displayRiders(data.riders || []);
+            } catch (e) {
+                showAlert('Error loading riders: ' + e.message, 'error');
+            }
+        }
+
+        async function viewAvailableRiders() {
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+                const available = (data.riders || []).filter(r => r.status === 'AVAILABLE');
+                displayRiders(available);
+            } catch (e) {
+                showAlert('Error loading riders: ' + e.message, 'error');
+            }
+        }
+
+        async function searchRiders() {
+            const query = document.getElementById('searchRiderInput').value.toLowerCase();
+            if (!query) {
+                viewAllRiders();
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/riders/search?q=' + encodeURIComponent(query));
+                const results = await res.json();
+                displayRiders(results.riders || []);
+            } catch (e) {
+                showAlert('Error searching: ' + e.message, 'error');
+            }
+        }
+
+        function displayRiders(riders) {
+            const container = document.getElementById('ridersList');
+            if (!riders || riders.length === 0) {
+                container.innerHTML = '<div class="empty-state">No riders found</div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Rider ID</th><th>Name</th><th>Location</th><th>Status</th></tr></thead><tbody>';
+            riders.forEach(rider => {
+                const statusClass = rider.status.toLowerCase();
+                html += `<tr>
+                    <td>${rider.id}</td>
+                    <td>${rider.name}</td>
+                    <td>${rider.location}</td>
+                    <td><span class="status-badge status-${statusClass}">${rider.status}</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Dispatch Functions
+        async function assignOrder() {
+            try {
+                const res = await fetch('/api/dispatch/assign', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert(result.message || 'Order assigned successfully!', 'success');
+                    loadDispatchStatus();
+                    viewAllOrders();
+                } else {
+                    showAlert(result.error || 'Failed to assign order', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function completeOrder() {
+            const orderId = document.getElementById('completeOrderId').value;
+            if (!orderId) {
+                showAlert('Please enter an Order ID', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/dispatch/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Order completed successfully!', 'success');
+                    document.getElementById('completeOrderId').value = '';
+                    loadDispatchStatus();
+                    viewAllOrders();
+                } else {
+                    showAlert(result.error || 'Failed to complete order', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function undoDispatch() {
+            try {
+                const res = await fetch('/api/dispatch/undo', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Dispatch undone successfully!', 'success');
+                    loadDispatchStatus();
+                    viewAllOrders();
+                } else {
+                    showAlert(result.error || 'Failed to undo dispatch', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function redoDispatch() {
+            try {
+                const res = await fetch('/api/dispatch/redo', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Dispatch redone successfully!', 'success');
+                    loadDispatchStatus();
+                    viewAllOrders();
+                } else {
+                    showAlert(result.error || 'Failed to redo dispatch', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function loadDispatchStatus() {
+            try {
+                const res = await fetch('/api/dispatch/status');
+                const data = await res.json();
+                const container = document.getElementById('dispatchStatus');
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Total Dispatched</div>
+                            <div class="value">${data.totalDispatched || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Total Distance</div>
+                            <div class="value">${(data.totalDistance || 0).toFixed(1)}m</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Available Riders</div>
+                            <div class="value">${data.availableRiders || 0}</div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                showAlert('Error loading dispatch status: ' + e.message, 'error');
+            }
+        }
+
+        // Map Functions
+        async function addLocation() {
+            const data = {
+                name: document.getElementById('locationName').value,
+                faculty: document.getElementById('locationFaculty').value,
+                block: document.getElementById('locationBlock').value
+            };
+
+            try {
+                const res = await fetch('/api/map/location/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Location added successfully!', 'success');
+                    document.getElementById('addLocationForm').reset();
+                } else {
+                    showAlert(result.error || 'Failed to add location', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function addRoute() {
+            const data = {
+                from: document.getElementById('routeFrom').value,
+                to: document.getElementById('routeTo').value,
+                distance: parseInt(document.getElementById('routeDistance').value)
+            };
+
+            try {
+                const res = await fetch('/api/map/route/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Route added successfully!', 'success');
+                    document.getElementById('addRouteForm').reset();
+                } else {
+                    showAlert(result.error || 'Failed to add route', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function findShortestPath() {
+            const from = document.getElementById('pathFrom').value;
+            const to = document.getElementById('pathTo').value;
+
+            try {
+                const res = await fetch(`/api/map/path?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+                const result = await res.json();
+                const container = document.getElementById('pathResult');
+                
+                if (result.success && result.path) {
+                    container.innerHTML = `
+                        <div class="path-result">
+                            <div class="path">${result.path.join(' → ')}</div>
+                            <div class="distance">Distance: ${result.distance} meters</div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="alert alert-error">${result.error || 'No path found'}</div>`;
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function loadCacheStats() {
+            try {
+                const res = await fetch('/api/map/cache');
+                const data = await res.json();
+                const container = document.getElementById('cacheStats');
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Cache Size</div>
+                            <div class="value">${data.cacheSize || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Cache Hits</div>
+                            <div class="value">${data.cacheHits || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Cache Misses</div>
+                            <div class="value">${data.cacheMisses || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Hit Rate</div>
+                            <div class="value">${(data.hitRate || 0).toFixed(1)}%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Dijkstra Calls</div>
+                            <div class="value">${data.dijkstraCalls || 0}</div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                showAlert('Error loading cache stats: ' + e.message, 'error');
+            }
+        }
+
+        async function clearCache() {
+            if (!confirm('Clear path cache?')) return;
+
+            try {
+                const res = await fetch('/api/map/cache/clear', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Cache cleared successfully!', 'success');
+                    loadCacheStats();
+                } else {
+                    showAlert(result.error || 'Failed to clear cache', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        // Data Functions
+        async function saveAllData() {
+            try {
+                const res = await fetch('/api/data/save', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('All data saved successfully!', 'success');
+                } else {
+                    showAlert(result.error || 'Failed to save data', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function loadAllData() {
+            if (!confirm('Reload all data from files? This will overwrite current data.')) return;
+
+            try {
+                const res = await fetch('/api/data/load', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Data loaded successfully!', 'success');
+                    viewAllOrders();
+                    viewAllRiders();
+                } else {
+                    showAlert(result.error || 'Failed to load data', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function saveRiders() {
+            try {
+                const res = await fetch('/api/data/save/riders', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Riders saved successfully!', 'success');
+                } else {
+                    showAlert(result.error || 'Failed to save riders', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function saveOrders() {
+            try {
+                const res = await fetch('/api/data/save/orders', { method: 'POST' });
+                const result = await res.json();
+                if (result.success) {
+                    showAlert('Orders saved successfully!', 'success');
+                } else {
+                    showAlert(result.error || 'Failed to save orders', 'error');
+                }
+            } catch (e) {
+                showAlert('Error: ' + e.message, 'error');
+            }
+        }
+
+        // Statistics
+        async function loadStatistics() {
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+                const stats = data.stats || {};
+                const container = document.getElementById('statisticsContent');
+                
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Uptime</div>
+                            <div class="value">${stats.uptime || 0}s</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Total Orders</div>
+                            <div class="value">${stats.totalOrders || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Pending Orders</div>
+                            <div class="value">${stats.pendingOrders || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Total Distance</div>
+                            <div class="value">${(stats.totalDistance || 0).toFixed(1)}m</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Avg Distance</div>
+                            <div class="value">${(stats.avgDistance || 0).toFixed(1)}m</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Active Riders</div>
+                            <div class="value">${stats.activeRiders || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Dijkstra Calls</div>
+                            <div class="value">${stats.dijkstraCalls || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="label">Cache Hit Rate</div>
+                            <div class="value">${(stats.cacheHitRate || 0).toFixed(1)}%</div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                showAlert('Error loading statistics: ' + e.message, 'error');
+            }
+        }
+
+        // Initialize
+        viewAllOrders();
+    </script>
+</body>
+
+</html>

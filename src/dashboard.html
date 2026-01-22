@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Ops Center</title>
+    <style>
+        :root {
+            --bg-dark: #050510;
+            --panel-glass: rgba(20, 30, 60, 0.6);
+            --accent-cyan: #00f3ff;
+            --accent-pink: #ff0099;
+            --accent-green: #00ff66;
+            --accent-yellow: #ffee00;
+            --text-primary: #e0faff;
+            --text-dim: #64748b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+        }
+
+        /* Scanlines Effect */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #mapContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .sidebar {
+            background: var(--panel-glass);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            gap: 24px;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .header {
+            border-bottom: 2px solid rgba(0, 243, 255, 0.3);
+            padding-bottom: 16px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        h2 {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 12px 0;
+        }
+
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 243, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 243, 255, 0.5);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--text-dim);
+        }
+
+        .card:hover {
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.active::before {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+
+        .card.warning::before {
+            background: var(--accent-yellow);
+            box-shadow: 0 0 8px var(--accent-yellow);
+        }
+
+        .card.success::before {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+        }
+
+        .status-badge.available {
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .status-badge.delivering {
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .overlay-loader {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 20px var(--accent-cyan);
+            letter-spacing: 4px;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="mapContainer">
+        <canvas id="campusMap"></canvas>
+        <div id="loader" class="overlay-loader">INITIALIZING SYSTEM DATA...</div>
+    </div>
+
+    <div class="sidebar">
+        <div class="header">
+            <h1>CAMPUS OPS</h1>
+            <div style="font-size: 0.8rem; color: var(--text-dim); margin-top:4px;">Live Delivery Monitoring</div>
+        </div>
+
+        <div style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
+            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <h2>Fleet Status</h2>
+                <div class="panel" id="riderList">
+                    <!-- Riders injected here -->
+                </div>
+            </div>
+
+            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <h2>Active Orders</h2>
+                <div class="panel" id="orderList">
+                    <!-- Orders injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <h2>System Stats</h2>
+            <div class="row">
+                <span>Active Nodes</span>
+                <span class="stat-value" id="nodeCount">0</span>
+            </div>
+            <div class="row" style="margin-top:4px;">
+                <span>Active Routes</span>
+                <span class="stat-value" id="routeCount">0</span>
+            </div>
+            <div class="row" style="margin-top:4px;">
+                <span>System Status</span>
+                <span class="status-badge available">ONLINE</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Cyberpunk Graph Visualizer
+         */
+        const canvas = document.getElementById('campusMap');
+        const ctx = canvas.getContext('2d');
+
+        // Config
+        const NODE_RADIUS = 6;
+        const RIDER_RADIUS = 10;
+
+        // State
+        let nodes = [];
+        let edges = [];
+        let riders = [];
+        let width, height;
+        let time = 0;
+
+        // Stable Hash for consistent positioning
+        function getStablePosition(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            // Use a grid-like distribution based on hash to avoid too much overlap
+            const gridX = Math.abs(hash % 8);
+            const gridY = Math.abs((hash >> 3) % 6);
+
+            // Add some noise
+            const noiseX = (hash % 100) / 100 * 50;
+            const noiseY = ((hash >> 2) % 100) / 100 * 50;
+
+            const pad = 100;
+            const w = width - pad * 2;
+            const h = height - pad * 2;
+
+            return {
+                x: pad + (gridX / 8) * w + noiseX,
+                y: pad + (gridY / 6) * h + noiseY
+            };
+        }
+
+        function resize() {
+            // High DPI scaling
+            const dpr = window.devicePixelRatio || 1;
+            const rect = document.getElementById('mapContainer').getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+
+            // Re-layout if needed
+            if (nodes.length > 0) layoutNodes();
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function layoutNodes() {
+            nodes.forEach(n => {
+                const pos = getStablePosition(n.name);
+                n.x = pos.x;
+                n.y = pos.y;
+            });
+        }
+
+        async function fetchState() {
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+
+                document.getElementById('loader').style.opacity = '0';
+
+                // Sync Data
+                updateGraph(data);
+                updateUI(data);
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function updateGraph(data) {
+            // Sync Nodes
+            if (nodes.length === 0) {
+                nodes = data.locations.map(l => ({ name: l.name, x: 0, y: 0 }));
+                layoutNodes();
+            } else if (data.locations.length > nodes.length) {
+                // Add new nodes
+                const existing = new Set(nodes.map(n => n.name));
+                data.locations.forEach(l => {
+                    if (!existing.has(l.name)) {
+                        const pos = getStablePosition(l.name);
+                        nodes.push({ name: l.name, x: pos.x, y: pos.y });
+                    }
+                });
+            }
+
+            // Sync Edges
+            edges = [];
+            if (data.routes) {
+                data.routes.forEach(r => {
+                    const n1 = nodes.find(n => n.name === r.from);
+                    const n2 = nodes.find(n => n.name === r.to);
+                    if (n1 && n2) {
+                        edges.push({ from: n1, to: n2, weight: r.weight });
+                    }
+                });
+            }
+
+            // Sync Riders
+            riders = data.riders.filter(r => r != null);
+        }
+
+        function updateUI(data) {
+            document.getElementById('nodeCount').innerText = nodes.length;
+            document.getElementById('routeCount').innerText = edges.length;
+
+            // Update Riders
+            const riderList = document.getElementById('riderList');
+            riderList.innerHTML = riders.map(r => {
+                const statusClass = r.status.toLowerCase();
+                const cardClass = statusClass === 'delivering' ? 'active' : 'success';
+                return `
+            <div class="card ${cardClass}">
+                <div class="row">
+                    <strong>${r.name}</strong>
+                    <span class="status-badge ${statusClass}">${r.status}</span>
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-dim); margin-top:4px;">
+                    📍 ${r.location} <br/>
+                    🆔 ${r.id}
+                </div>
+            </div>`;
+            }).join('');
+
+            // Update Orders
+            const orderList = document.getElementById('orderList');
+            if (data.orders) {
+                orderList.innerHTML = data.orders.map(o => {
+                    let cardClass = '';
+                    let statusClass = o.status.toLowerCase();
+
+                    if (statusClass === 'pending') cardClass = 'warning';
+                    else if (statusClass === 'delivering') cardClass = 'active';
+                    else if (statusClass === 'delivered') cardClass = 'success';
+                    else if (statusClass === 'cancelled') {
+                        cardClass = '';
+                        statusClass = 'cancelled';
+                    }
+
+                    return `
+            <div class="card ${cardClass}">
+                <div class="row">
+                    <strong>Order #${o.id}</strong>
+                    <span class="status-badge ${statusClass}" style="${statusClass === 'cancelled' ? 'color: #ff3333; border-color: #ff3333;' : ''}">${o.status}</span>
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-dim); margin-top:4px;">
+                    � ${o.studentName} <br/>
+                    🚩 ${o.pickup} ➔ � ${o.delivery}
+                </div>
+            </div>`;
+                }).join('');
+            }
+        }
+
+        // Animation Loop
+        function loop() {
+            time += 0.05;
+
+            // Clear
+            ctx.fillStyle = '#050510';
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw Connections
+            ctx.lineWidth = 1;
+            edges.forEach(e => {
+                // Gradient Line
+                const grad = ctx.createLinearGradient(e.from.x, e.from.y, e.to.x, e.to.y);
+                grad.addColorStop(0, 'rgba(0, 243, 255, 0.1)');
+                grad.addColorStop(0.5, 'rgba(0, 243, 255, 0.3)');
+                grad.addColorStop(1, 'rgba(0, 243, 255, 0.1)');
+
+                ctx.strokeStyle = grad;
+                ctx.beginPath();
+                ctx.moveTo(e.from.x, e.from.y);
+                ctx.lineTo(e.to.x, e.to.y);
+                ctx.stroke();
+            });
+
+            // Draw Nodes
+            nodes.forEach(n => {
+                // Pulsing glow
+                const pulse = Math.sin(time + n.x * 0.01) * 3 + 4;
+
+                // Glow
+                ctx.shadowBlur = pulse + 5;
+                ctx.shadowColor = 'rgba(0, 243, 255, 0.8)';
+
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2);
+                ctx.fillStyle = '#0f172a';
+                ctx.fill();
+
+                ctx.strokeStyle = '#00f3ff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Text
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.font = '10px Arial';
+                ctx.fillText(n.name, n.x - 10, n.y - 12);
+            });
+
+            // Draw Riders
+            riders.forEach(r => {
+                const n = nodes.find(node => node.name === r.location);
+                if (n) {
+                    // Determine color
+                    const color = r.status === 'AVAILABLE' ? '#00ff66' : '#ffee00';
+
+                    // Outer ring pulse
+                    const pulse = Math.abs(Math.sin(time * 2)) * 10;
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, RIDER_RADIUS + pulse / 2, 0, Math.PI * 2);
+                    ctx.strokeStyle = color;
+                    ctx.globalAlpha = 0.5 - (pulse / 20);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1.0;
+
+                    // Rider Dot
+                    ctx.beginPath();
+                    ctx.arc(n.x, n.y, RIDER_RADIUS, 0, Math.PI * 2);
+                    ctx.fillStyle = color;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = color;
+                    ctx.fill();
+
+                    // Icon
+                    ctx.fillStyle = '#000';
+                    ctx.shadowBlur = 0;
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🛵', n.x, n.y);
+                }
+            });
+
+            requestAnimationFrame(loop);
+        }
+
+        // Start
+        loop();
+        setInterval(fetchState, 1000);
+        fetchState();
+
+    </script>
+</body>
+
+</html>

@@ -218,9 +218,9 @@ public class DispatchSystem {
         // Display path (simplified - shows route summary)
         System.out.println("Route: " + previousRiderLocation + " → " + pickupLoc + " → " + deliveryLoc);
 
-        System.out.println("Distance to Pickup: " + bestDistToPickup + " km");
-        System.out.println("Distance to Delivery: " + bestDistToDelivery + " km");
-        System.out.println("Total Distance: " + totalDistance + " km");
+        System.out.println("Distance to Pickup: " + bestDistToPickup + " m");
+        System.out.println("Distance to Delivery: " + bestDistToDelivery + " m");
+        System.out.println("Total Distance: " + totalDistance + " m");
         System.out.println("========================\n");
     }
 
@@ -505,8 +505,8 @@ public class DispatchSystem {
         System.out.println("Total Riders: " + riderCount);
         System.out.println("Available Riders: " + getAvailableRiderCount());
         System.out.println("Orders Dispatched: " + totalOrdersDispatched);
-        System.out.printf("Total Distance Assigned: %.1f km%n", totalDistanceAssigned);
-        System.out.printf("Average Distance per Order: %.1f km%n", getAverageDistancePerOrder());
+        System.out.printf("Total Distance Assigned: %.1f m%n", totalDistanceAssigned);
+        System.out.printf("Average Distance per Order: %.1f m%n", getAverageDistancePerOrder());
         System.out.println("Undo Stack Size: " + undoTop);
         System.out.println("Redo Stack Size: " + redoTop);
         System.out.println("==================================\n");

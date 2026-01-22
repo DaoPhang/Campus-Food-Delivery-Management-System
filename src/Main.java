@@ -19,10 +19,21 @@ public class Main {
 
         ConsoleUI.printHeader("CAMPUS FOOD DELIVERY MANAGEMENT SYSTEM");
 
-        // Initialize systems
+        // Initialize YOUR systems (Keep this line)
         initializeSystems();
 
-        // Main menu loop
+        //Start Teammate's Web Server
+        // We pass YOUR campusMap, dispatchSystem, and orderSystem into THEIR server
+        try {
+            WebServer server = new WebServer(campusMap, dispatchSystem, orderSystem);
+            server.start();
+            ConsoleUI.printSuccess("Web Dashboard running at: http://localhost:8080");
+            ConsoleUI.printInfo("Admin Panel: http://localhost:8080/admin.html");
+        } catch (java.io.IOException e) {
+            ConsoleUI.printError("Web Server failed to start: " + e.getMessage());
+        }
+
+        // 3. Continue with YOUR Console Menu Loop (Keep the rest the same)
         boolean running = true;
         while (running) {
             displayMainMenu();

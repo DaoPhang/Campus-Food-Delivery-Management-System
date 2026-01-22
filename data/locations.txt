@@ -1,12 +1,32 @@
-FCSIT,Faculty,Block A
-Main Library,Academic,Central Zone
-DTC,Hall,Main Hall
-KK12,Hostel,Raja Dr Nazrin Shah
+KK1,Hostel,Tuanku Abdul Rahman
+KK2,Hostel,Tuanku Bahiyah
+KK3,Hostel,Tuanku Kurshiah
+KK4,Hostel,Bestari
+KK5,Hostel,Dayasari
+KK6,Hostel,Ibnu Sina
+KK7,Hostel,Za'ba
+KK8,Hostel,Kinabalu
 KK9,Hostel,Tun Syed Zahiruddin
+KK10,Hostel,Tun Ahmad Zaidi
+KK11,Hostel,Ungku Aziz
+KK12,Hostel,Raja Dr Nazrin Shah
+KK13,Hostel,Kolej Kediaman 13
+FCSIT,Faculty,Block A
 Faculty of Science,Faculty,Block S
 Faculty of Engineering,Faculty,Block E
+Faculty of Law,Faculty,Main Building
+Faculty of Economics,Faculty,Main Building
+Faculty of Arts,Faculty,Main Building
+Main Library,Academic,Central Zone
+DTC,Hall,Main Hall
 UM Arena,Sports,Stadium
 Exam Hall,Academic,DTC Complex
 Main Gate KL,Entrance,Gate 1
 PJ Gate,Entrance,Gate 2
 Varsity Lake,Recreation,Zone V
+He & She Coffee,Cafeteria,Main Library
+The Cube,Cafeteria,FCSIT
+Food Court A,Cafeteria,Faculty of Arts
+Kafe KK5,Cafeteria,Dayasari
+Kafe KK12,Cafeteria,Raja Dr Nazrin Shah
+Rumah Universiti,Restaurant,Chancellery

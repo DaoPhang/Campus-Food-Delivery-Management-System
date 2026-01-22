@@ -1,5 +1,10 @@
-O001,Aisyah,Main Library,KK12,1,Pending
-O002,Ben,FCSIT,KK9,2,Pending
-O003,Chong,Faculty of Science,UM Arena,1,Pending
-O004,David,Faculty of Engineering,Main Gate KL,3,Pending
-O005,Elina,DTC,FCSIT,2,Pending
+R001,Ahmad,Main Gate KL
+R002,Ben,FCSIT
+R003,Chong,Faculty of Science
+R004,Dinesh,KK12
+R005,Elina,DTC
+R006,Farid,KK5
+R007,Gina,Main Library
+R008,Hassan,PJ Gate
+R009,Indra,KK9
+R010,Jenny,Faculty of Engineering

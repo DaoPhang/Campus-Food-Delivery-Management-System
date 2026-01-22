@@ -1,5 +1,5 @@
-O001,Aisyah,Main Library,KK12,1,Pending
-O002,Ben,FCSIT,KK9,2,Pending
-O003,Chong,Faculty of Science,UM Arena,1,Pending
-O004,David,Faculty of Engineering,Main Gate KL,3,Pending
-O005,Elina,DTC,FCSIT,2,Pending
+O001,Ali,The Cube,KK12,1,Pending
+O002,Mei Ling,Kafe KK5,FCSIT,2,Pending
+O003,Raju,Food Court A,KK9,1,Pending
+O004,Siti,He & She Coffee,Faculty of Law,3,Pending
+O005,John,Kafe KK12,Faculty of Engineering,2,Pending
