@@ -10,9 +10,12 @@
 [Click here to watch our 5-minute Project Walkthrough](#) *(Insert YouTube/Drive Link Here)*
 
 ## 📖 Project Overview
-The **Campus Food Delivery Management System** is a Java-based console application designed to simulate and manage the logistics of food delivery within a university campus. The system handles order placement, rider dispatching, route optimization, and system monitoring.
+The **Campus Food Delivery Management System** is a hybrid (Console + Web) application designed to simulate and manage the logistics of food delivery within a university campus. The system handles order placement, rider dispatching, route optimization, and real-time monitoring.
 
-**Key Technical Constraint:** This project is built using **custom manual data structures** (Arrays, Linked Lists logic via arrays, Stacks, Queues) without relying on Java's built-in Collections Framework (e.g., `ArrayList`, `HashMap`, `LinkedList`, `PriorityQueue` are **NOT** used).
+**Key Technical Constraint:** This project is built using **custom manual data structures** without relying on Java's built-in Collections Framework.
+* ❌ No `java.util.HashMap` → ✅ **CustomHashMap (Separate Chaining)**
+* ❌ No `java.util.PriorityQueue` → ✅ **Manual Sorted Array Logic**
+* ❌ No `java.util.ArrayList` → ✅ **Dynamic Resizing Arrays**
 
 ---
 
@@ -20,11 +23,13 @@ The **Campus Food Delivery Management System** is a Java-based console applicati
 
 ```text
 src/
-├── Main.java                // Entry point and Menu System
+├── Main.java                // Entry point (Launches Console + Web Server)
+├── WebServer.java           // Custom HTTP Server for Dashboard (No frameworks)
+├── CustomHashMap.java       // Manual Hash Table implementation (O(1) lookup)
 ├── CampusMap.java           // High-level interface for the Map
 ├── Graph.java               // Core graph algorithms (Dijkstra, Adjacency List)
 ├── DispatchSystem.java      // Rider management and dispatch logic
-├── OrderSystem.java         // Order management and Queue system
+├── OrderSystem.java         // Order management and Priority Queue
 ├── Rider.java               // Rider entity
 ├── Order.java               // Order entity
 ├── Location.java            // Location entity
@@ -32,156 +37,68 @@ src/
 ├── DispatchAction.java      // State object for Undo/Redo history
 ├── PathResult.java          // Helper class for Path Caching
 └── SystemStatistics.java    // Singleton class for global metrics
+web/
+├── dashboard.html           // Real-time Cyberpunk Graph Visualizer
+└── admin.html               // Web-based Admin Control Panel
 data/
 ├── locations.txt            // Map nodes
 ├── routes.txt               // Map edges (distances)
 ├── riders.txt               // Rider data
 └── orders.txt               // Order data
-docs/
-├── MEMBER3_COORDINATION_NOTES.md // Internal team notes
-└── WIA1002 Campus Food Delivery Management System.pdf // Project requirements/specs
 ```
-
----
-
-## 🏗 Class Descriptions (Detailed)
-
-### 1. Main.java
-*   **Role**: The central controller of the application.
-*   **Functionality**:
-    *   Initializes all subsystems (`Graph`, `DispatchSystem`, `OrderSystem`).
-    *   Provides a Command Line Interface (CLI) with a main menu.
-    *   Handles user inputs and routes them to the appropriate system methods.
-    *   Demonstrates the integration of all 5 system upgrades.
-
-### 2. Graph.java
-*   **Role**: Represents the campus map using a graph data structure.
-*   **Functionality**:
-    *   **Manual Adjacency List**: Uses `Edge[][]` and `int[]` arrays to store connections between locations.
-    *   **Dijkstra's Algorithm**: Implements the shortest path algorithm using manual priority queue logic (arrays).
-    *   **Path Caching**: Stores frequently calculated paths in `PathResult[]` arrays to optimize performance (Upgrade 4).
-    *   **File I/O**: Loads locations and routes from text files.
-
-### 3. DispatchSystem.java
-*   **Role**: Manages the fleet of riders and handles the assignment logic.
-*   **Functionality**:
-    *   **Rider Management**: Stores riders in a fixed-size array `Rider[]`.
-    *   **Weighted Dispatch Algorithm (Upgrade 1)**: Calculates a score for each rider based on distance, workload, and idle time to find the optimal assignment.
-    *   **Undo/Redo System (Upgrade 3)**: Uses two manual stacks (`DispatchAction[]`) to track and reverse dispatch decisions.
-    *   **Statistics**: Tracks total orders dispatched and distance covered.
-
-### 4. OrderSystem.java
-*   **Role**: Manages customer orders.
-*   **Functionality**:
-    *   **Order Queue**: Implements a manual FIFO (First-In-First-Out) queue using an `Order[]` array with `front` and `rear` pointers.
-    *   **Order Lookup**: Provides linear search capabilities to find orders by ID or Student Name.
-    *   **Priority Handling**: Inserts orders into the queue based on priority level.
-
-### 5. CampusMap.java
-*   **Role**: A wrapper class acting as a facade for `Graph.java`.
-*   **Functionality**: Simplifies method calls for the `Main` class (e.g., `getDistance`, `getShortestPath`) and delegates complex logic to the `Graph`.
-
-### 6. ConsoleUI.java
-*   **Role**: Handles all rich console output and user interface elements.
-*   **Functionality**:
-    *   **Visual Enhancements**: Provides ANSI color codes (Red for errors, Green for success, etc.) and formatted tables.
-    *   **Animations**: Includes a "loading" animation to simulate processing time for algorithms.
-    *   **Standardized Output**: Helper methods for headers, dividers, and consistent message formatting.
-
-### 7. SystemStatistics.java (Upgrade 5)
-*   **Role**: A Singleton class for tracking global system performance.
-*   **Functionality**: Aggregates data from all systems to display a comprehensive report (Total Orders, Average Delivery Time, Cache Hit Rates, etc.).
-
-### 8. Entity Classes
-*   **Rider.java**: Stores rider details (ID, Name, Location, Status, Jobs Completed).
-*   **Order.java**: Stores order details (ID, Student Name, Pickup/Delivery Locations, Status).
-*   **Location.java**: Represents a node on the map (Name, Faculty, Block).
-*   **Edge.java**: Represents a connection between two locations with a weight (distance).
-*   **DispatchAction.java**: A "snapshot" object storing the details of a dispatch event, used specifically for the Undo/Redo stacks.
-*   **PathResult.java**: A helper object to store the result of a pathfinding operation (nodes and total distance) for the cache.
-
----
-
-## 📂 Data Configuration
-The system is pre-loaded with data from the `data/` directory. You can edit these files to customize the simulation.
-
-### 1. `locations.txt`
-Defines the nodes in the campus graph.
-*   **Format**: `Name,Category,Block`
-*   **Example**: `FCSIT,Faculty,Block A`
-
-### 2. `routes.txt`
-Defines the edges (connections) between locations.
-*   **Format**: `Location1,Location2,Distance(meters)`
-*   **Example**: `Main Gate KL,DTC,400`
-
-### 3. `riders.txt`
-Defines the initial fleet of riders.
-*   **Format**: `RiderID,Name,StartingLocation`
-*   **Example**: `R001,Ali,Main Gate KL`
-
-### 4. `orders.txt`
-Defines pre-existing orders for testing.
-*   **Format**: `OrderID,StudentName,Pickup,Dropoff,Priority,Status`
-*   **Example**: `O001,Aisyah,Main Library,KK12,1,Pending`
 
 ---
 
 ## 🚀 System Features & Upgrades
 
-This project implements 5 specific upgrades to the base system:
+This project implements **6 specific upgrades** to the base requirements:
 
-1.  **Weighted Optimization Dispatch**:
-    *   Instead of random assignment, riders are chosen based on a weighted score:
-    *   `Score = (1.0 * Distance) + (2.0 * Jobs_Completed) - (0.5 * Idle_Time)`
-    *   Ensures efficiency and fairness.
+1.  **Custom Data Structures (Mastery)**:
+    * Implemented `CustomHashMap<K,V>` from scratch using bucket arrays and linked-list collision handling for O(1) rider/order lookups.
 
-2.  **File Persistence**:
-    *   Ability to **Save** current state (Riders, Orders) to `.txt` files.
-    *   Ability to **Load** system state from `.txt` files on startup.
+2.  **Hybrid Interface (Console + Web)**:
+    * **Console**: Robust CLI for standard operations.
+    * **Web Dashboard**: A real-time HTML5 Canvas visualization of the graph, showing riders moving between nodes and live order statuses. Built using a custom threaded `HttpServer`.
 
-3.  **Undo/Redo Capability**:
-    *   **Undo**: Reverses the last dispatch action, returning the order to "Pending" and the rider to "Available".
-    *   **Redo**: Re-applies the dispatch action that was just undone.
-    *   Implemented using manual Stack data structures.
+3.  **Weighted Optimization Dispatch**:
+    * Riders are chosen based on a weighted score:
+    * `Score = (1.0 * Distance) + (2.0 * Jobs_Completed) - (0.5 * Idle_Time)`
 
-4.  **Path Caching**:
-    *   Stores the result of Dijkstra's algorithm.
-    *   If a route is requested again, it is retrieved from the cache (O(1)) instead of recalculating (O(V+E)), significantly improving performance.
+4.  **File Persistence**:
+    * Ability to **Save/Load** system state (Riders, Orders, Locations) to `.txt` files.
 
-5.  **Performance Statistics**:
-    *   Real-time tracking of metrics like "Average Distance per Order", "Cache Hit Rate", and "Rider Utilization".
+5.  **Undo/Redo Capability**:
+    * Implemented using manual Stack data structures to reverse dispatch actions.
+
+6.  **Path Caching**:
+    * Stores the result of Dijkstra's algorithm. If a route is requested again, it is retrieved from the cache (O(1)) instead of recalculating (O(V+E)).
+
+---
 
 ## ✅ Requirements Compliance Checklist
+
 | Requirement | Implementation Detail | Location |
 | :--- | :--- | :--- |
 | **Graph (Adjacency List)** | Custom `Edge[][]` array structure | `Graph.java` |
-| **Priority Queue** | Manual sorted insertion logic | `OrderSystem.java` |
-| **Lookup (Dictionary)** | **Manual Linear Search** (Array-based) to demonstrate low-level traversal logic instead of built-in HashMaps. | `OrderSystem.java` |
+| **Priority Queue** | Manual sorted insertion logic (Insertion Sort) | `OrderSystem.java` |
+| **Lookup (Dictionary)** | **Custom Hash Map** (Separate Chaining) | `CustomHashMap.java` |
 | **Shortest Path** | Dijkstra's Algorithm (Manual Implementation) | `Graph.java` |
-| **Stack/Queue** | Manual Array-based Stack (Undo/Redo) and Queue (Orders) | `DispatchSystem.java` |
+| **Stack/Queue** | Manual Array-based Stack (Undo/Redo) and Queue | `DispatchSystem.java` |
 
 ---
 
 ## 📖 User Guide
 
-### 1. Order Management
-*   **Add Order**: Enter details (ID, Name, Locations). Order goes to the Pending Queue.
-*   **View Orders**: See lists of Pending, Delivering, or Completed orders.
-*   **Search**: Find orders by ID or Student Name.
+### 1. Launching the System
+1.  Run the application via `Main.java`.
+2.  The **Console Menu** will appear for standard inputs.
+3.  The **Web Server** automatically starts at `http://localhost:8080`.
+    * Open browser to see the live graph visualization.
 
-### 2. Rider Management
-*   **Add Rider**: Register a new rider with a starting location.
-*   **View Riders**: See status (Available/Delivering) and location of all riders.
-
-### 3. Dispatching
-*   **Assign Next Order**: The system automatically picks the highest priority order and assigns it to the best available rider using the Weighted Algorithm.
-*   **Complete Order**: Mark an order as "Delivered". The rider becomes available at the delivery location.
-*   **Undo/Redo**: Mistake in dispatching? Use Undo to revert.
-
-### 4. Map Operations
-*   **View Map**: See all connections.
-*   **Shortest Path**: Enter two locations to see the optimal route and distance.
+### 2. Operations
+* **Assign Next Order**: The system automatically picks the highest priority order and assigns it to the best available rider using the Weighted Algorithm.
+* **View Map**: Use option 4 in Console or view the Web Dashboard.
+* **Undo/Redo**: Mistake in dispatching? Use Undo to revert.
 
 ---
 
@@ -192,7 +109,7 @@ This project implements 5 specific upgrades to the base system:
 | **Member 1 (Graph & Algorithm)** | Graph Data Structure, Dijkstra's Algorithm, Path Caching, Map Management | AN JUN LI |
 | **Member 2 (Orders & Priority)** | Order Queue Implementation, Priority Logic, Order Data Management | TEOW YAN PING |
 | **Member 3 (Dispatch & Integration)** | Dispatch Algorithm, Rider Management, Undo/Redo System, System Integration | TAN DAO PHANG |
-| **Member 4 (UI & Presentation)** | Main Menu Interface, User Interaction, Documentation, Final Presentation | YANG PU |
+| **Member 4 (UI & Presentation)** | Main Menu, Web Server Integration, Documentation, Final Presentation | YANG PU |
 
 ---
 
@@ -200,7 +117,6 @@ This project implements 5 specific upgrades to the base system:
 
 ### Prerequisites
 * **Java Development Kit (JDK)**: Version 8 or higher.
-* **OS**: Windows, macOS, or Linux (Console supports ANSI colors on all platforms).
 
 1.  **Compile**:
     ```bash
@@ -210,3 +126,5 @@ This project implements 5 specific upgrades to the base system:
     ```bash
     java -cp src Main
     ```
+3.  **Access Web UI**:
+    Open `http://localhost:8080/dashboard.html` in your browser.
