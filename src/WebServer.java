@@ -1,16 +1,15 @@
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class WebServer {
     private HttpServer server;
@@ -76,12 +75,24 @@ public class WebServer {
         String response = "";
         
         try {
-            java.nio.file.Path htmlPath = Paths.get("src", filename);
+            // Check 'web' folder (Standard structure if running from root)
+            java.nio.file.Path htmlPath = Paths.get("web", filename);
+            
             if (!Files.exists(htmlPath)) {
+                // Check sibling 'web' folder (If running from src)
+                htmlPath = Paths.get("..", "web", filename);
+            }
+            if (!Files.exists(htmlPath)) {
+                // Fallback to 'src' (Legacy structure)
+                htmlPath = Paths.get("src", filename);
+            }
+            if (!Files.exists(htmlPath)) {
+                // Fallback to current directory
                 htmlPath = Paths.get(filename);
             }
             if (!Files.exists(htmlPath)) {
-                htmlPath = Paths.get(System.getProperty("user.dir"), "src", filename);
+                // Fallback to absolute path check
+                htmlPath = Paths.get(System.getProperty("user.dir"), "web", filename);
             }
             
             if (!Files.exists(htmlPath)) {
