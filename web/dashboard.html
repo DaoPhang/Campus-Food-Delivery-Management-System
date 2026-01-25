@@ -33,7 +33,7 @@
         /* Scanlines Effect */
         body::after {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
@@ -49,6 +49,11 @@
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            cursor: grab;
+        }
+
+        #mapContainer.grabbing {
+            cursor: grabbing;
         }
 
         canvas {
@@ -65,12 +70,15 @@
             gap: 24px;
             box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
             z-index: 10;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .header {
             border-bottom: 2px solid rgba(0, 243, 255, 0.3);
             padding-bottom: 16px;
             margin-bottom: 8px;
+            flex-shrink: 0;
         }
 
         h1 {
@@ -88,6 +96,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin: 0 0 12px 0;
+            flex-shrink: 0;
         }
 
         .panel {
@@ -97,24 +106,28 @@
             gap: 12px;
             overflow-y: auto;
             padding-right: 4px;
+            min-height: 0;
         }
 
         /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(0, 243, 255, 0.2);
-            border-radius: 3px;
+            background: rgba(0, 243, 255, 0.4);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 243, 255, 0.2);
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 243, 255, 0.5);
+            background: rgba(0, 243, 255, 0.6);
+            box-shadow: 0 0 6px rgba(0, 243, 255, 0.5);
         }
 
         .card {
@@ -125,6 +138,7 @@
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .card::before {
@@ -199,6 +213,51 @@
             letter-spacing: 4px;
             pointer-events: none;
             transition: opacity 0.5s;
+            z-index: 150;
+        }
+
+        .map-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            background: rgba(20, 30, 60, 0.95);
+            backdrop-filter: blur(16px);
+            border: 2px solid rgba(0, 243, 255, 0.5);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            z-index: 200;
+            pointer-events: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+
+        .reset-btn {
+            background: rgba(0, 243, 255, 0.15);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .reset-btn:hover {
+            background: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 0 5px rgba(0, 243, 255, 0.4);
         }
     </style>
 </head>
@@ -208,6 +267,11 @@
     <div id="mapContainer">
         <canvas id="campusMap"></canvas>
         <div id="loader" class="overlay-loader">INITIALIZING SYSTEM DATA...</div>
+        <div class="map-controls">
+            <span>Zoom: <span id="zoomLevel">100%</span></span>
+            <button class="reset-btn" onclick="resetView()">Reset View</button>
+            <span style="color: var(--text-dim); font-size: 0.7rem;">🖱️ Drag to pan | 🎡 Scroll to zoom</span>
+        </div>
     </div>
 
     <div class="sidebar">
@@ -216,15 +280,15 @@
             <div style="font-size: 0.8rem; color: var(--text-dim); margin-top:4px;">Live Delivery Monitoring</div>
         </div>
 
-        <div style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
-            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: 0;">
+            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;">
                 <h2>Fleet Status</h2>
                 <div class="panel" id="riderList">
                     <!-- Riders injected here -->
                 </div>
             </div>
 
-            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;">
                 <h2>Active Orders</h2>
                 <div class="panel" id="orderList">
                     <!-- Orders injected here -->
@@ -232,7 +296,7 @@
             </div>
         </div>
 
-        <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="flex-shrink: 0; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
             <h2>System Stats</h2>
             <div class="row">
                 <span>Active Nodes</span>
@@ -266,6 +330,12 @@
         let riders = [];
         let width, height;
         let time = 0;
+
+        // Pan & Zoom State
+        let pan = { x: 0, y: 0 };
+        let zoom = 1.0;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
 
         // Stable Hash for consistent positioning
         function getStablePosition(name) {
@@ -418,6 +488,61 @@
             }
         }
 
+        // Pan & Zoom Event Handlers
+        const mapContainer = document.getElementById('mapContainer');
+
+        mapContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragStart = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+            mapContainer.classList.add('grabbing');
+        });
+
+        mapContainer.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                pan.x = e.clientX - dragStart.x;
+                pan.y = e.clientY - dragStart.y;
+            }
+        });
+
+        mapContainer.addEventListener('mouseup', () => {
+            isDragging = false;
+            mapContainer.classList.remove('grabbing');
+        });
+
+        mapContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+            mapContainer.classList.remove('grabbing');
+        });
+
+        mapContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const newZoom = Math.min(Math.max(0.1, zoom * delta), 5);
+            
+            // Zoom towards mouse position
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            pan.x = mouseX - (mouseX - pan.x) * (newZoom / zoom);
+            pan.y = mouseY - (mouseY - pan.y) * (newZoom / zoom);
+            
+            zoom = newZoom;
+            updateZoomDisplay();
+        }, { passive: false });
+
+        // Reset view function
+        function resetView() {
+            pan = { x: 0, y: 0 };
+            zoom = 1.0;
+            updateZoomDisplay();
+        }
+
+        // Update zoom level display
+        function updateZoomDisplay() {
+            document.getElementById('zoomLevel').innerText = Math.round(zoom * 100) + '%';
+        }
+
         // Animation Loop
         function loop() {
             time += 0.05;
@@ -425,6 +550,11 @@
             // Clear
             ctx.fillStyle = '#050510';
             ctx.clearRect(0, 0, width, height);
+
+            // Apply transform
+            ctx.save();
+            ctx.translate(pan.x, pan.y);
+            ctx.scale(zoom, zoom);
 
             // Draw Connections
             ctx.lineWidth = 1;
@@ -501,6 +631,9 @@
                 }
             });
 
+            // Restore transform
+            ctx.restore();
+
             requestAnimationFrame(loop);
         }
 
@@ -508,6 +641,7 @@
         loop();
         setInterval(fetchState, 1000);
         fetchState();
+        updateZoomDisplay();
 
     </script>
 </body>
