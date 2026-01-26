@@ -4,3 +4,5 @@ out/
 .vscode/
 *.iml
 *.class
+desktop.ini
+Thumbs.db
